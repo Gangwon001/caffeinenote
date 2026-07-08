@@ -7,19 +7,33 @@ import {
   totalRemainingAt,
   type CaffeineEntry,
 } from "@/lib/caffeine";
+import { saveTodayLogs } from "@/app/calculator/caffeine/actions";
 
 interface DrinkEntry {
   id: string;
   name: string;
   caffeineMg: number;
   consumedAt: string;
+  drinkId?: string;
+}
+
+interface CatalogDrink {
+  id: string;
+  name: string;
+  caffeineMg: number;
 }
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 }
 
-export default function CaffeineCalculator({ isLoggedIn }: { isLoggedIn: boolean }) {
+export default function CaffeineCalculator({
+  isLoggedIn,
+  catalogDrinks,
+}: {
+  isLoggedIn: boolean;
+  catalogDrinks: CatalogDrink[];
+}) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000);
@@ -32,6 +46,19 @@ export default function CaffeineCalculator({ isLoggedIn }: { isLoggedIn: boolean
   const [draftName, setDraftName] = useState("");
   const [draftCaffeine, setDraftCaffeine] = useState("");
   const [draftConsumedAt, setDraftConsumedAt] = useState(() => toDatetimeLocalValue(new Date()));
+  const [draftDrinkId, setDraftDrinkId] = useState<string | undefined>(undefined);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  function handleNameChange(value: string) {
+    setDraftName(value);
+    const match = catalogDrinks.find((d) => d.name === value);
+    if (match) {
+      setDraftCaffeine(String(match.caffeineMg));
+      setDraftDrinkId(match.id);
+    } else {
+      setDraftDrinkId(undefined);
+    }
+  }
 
   function addEntry() {
     const caffeineMg = Number(draftCaffeine);
@@ -44,14 +71,34 @@ export default function CaffeineCalculator({ isLoggedIn }: { isLoggedIn: boolean
         name: draftName.trim(),
         caffeineMg,
         consumedAt: draftConsumedAt,
+        drinkId: draftDrinkId,
       },
     ]);
     setDraftName("");
     setDraftCaffeine("");
+    setDraftDrinkId(undefined);
   }
 
   function removeEntry(id: string) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  async function handleSave() {
+    const withDrinkId = entries.filter((e) => e.drinkId);
+    if (withDrinkId.length === 0) {
+      setSaveMessage("메뉴 목록에 있는 음료만 기록으로 저장할 수 있어요.");
+      return;
+    }
+
+    await saveTodayLogs(
+      withDrinkId.map((e) => ({ drinkId: e.drinkId!, consumedAt: e.consumedAt })),
+    );
+
+    const skipped = entries.length - withDrinkId.length;
+    setSaveMessage(
+      `${withDrinkId.length}개를 오늘 기록에 저장했어요.` +
+        (skipped > 0 ? ` (메뉴에 없는 ${skipped}개는 제외됨)` : ""),
+    );
   }
 
   const parsedEntries: CaffeineEntry[] = useMemo(
@@ -112,10 +159,16 @@ export default function CaffeineCalculator({ isLoggedIn }: { isLoggedIn: boolean
           음료 이름
           <input
             value={draftName}
-            onChange={(e) => setDraftName(e.target.value)}
+            onChange={(e) => handleNameChange(e.target.value)}
             placeholder="아메리카노"
+            list="calculator-drink-catalog"
             className="rounded-md border border-brand-soft bg-bg px-3 py-2 w-40"
           />
+          <datalist id="calculator-drink-catalog">
+            {catalogDrinks.map((d) => (
+              <option key={d.id} value={d.name} />
+            ))}
+          </datalist>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           카페인(mg)
@@ -232,14 +285,16 @@ export default function CaffeineCalculator({ isLoggedIn }: { isLoggedIn: boolean
           </p>
 
           {isLoggedIn && (
-            <button
-              type="button"
-              disabled
-              title="다음 단계에서 연동 예정입니다"
-              className="w-fit rounded-md bg-brand/50 text-bg px-4 py-2 font-medium cursor-not-allowed"
-            >
-              오늘 기록에 저장
-            </button>
+            <div className="flex flex-col gap-2 items-start">
+              <button
+                type="button"
+                onClick={handleSave}
+                className="w-fit rounded-md bg-brand text-bg px-4 py-2 font-medium hover:opacity-90"
+              >
+                오늘 기록에 저장
+              </button>
+              {saveMessage && <p className="text-sm text-ink/70">{saveMessage}</p>}
+            </div>
           )}
         </div>
       )}
