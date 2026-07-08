@@ -26,3 +26,40 @@ body {
   background: var(--color-bg);
   color: var(--color-ink);
 }
+
+.blog-content h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.375rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.blog-content p {
+  margin-bottom: 1rem;
+  line-height: 1.75;
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.blog-content ul {
+  list-style: disc;
+}
+
+.blog-content ol {
+  list-style: decimal;
+}
+
+.blog-content li {
+  margin-bottom: 0.25rem;
+}
+
+.blog-content blockquote {
+  border-left: 3px solid var(--color-brand-soft);
+  padding-left: 1rem;
+  color: color-mix(in srgb, var(--color-ink) 70%, transparent);
+}
