@@ -74,8 +74,30 @@ export default async function DrinkDetailPage({
     .order("published_at", { ascending: false })
     .limit(3);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "MenuItem",
+    name: `${drink.name_ko}${drink.size ? ` ${drink.size}` : ""}`,
+    ...(nutrition && {
+      nutrition: {
+        "@type": "NutritionInformation",
+        ...(nutrition.caffeine_mg != null && {
+          caffeineContent: `${nutrition.caffeine_mg} mg`,
+        }),
+        ...(nutrition.calories_kcal != null && {
+          calories: `${nutrition.calories_kcal} calories`,
+        }),
+        ...(nutrition.sugar_g != null && { sugarContent: `${nutrition.sugar_g} g` }),
+      },
+    }),
+  };
+
   return (
     <main className="flex-1 p-8 max-w-2xl mx-auto flex flex-col gap-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div>
         <p className="text-sm text-ink/60">
           <Link href={`/brands/${brand.slug}`} className="underline">
