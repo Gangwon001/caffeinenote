@@ -1,4 +1,5 @@
 import TiptapEditor from "@/components/admin/TiptapEditor";
+import { BLOG_CATEGORIES } from "@/lib/blog-categories";
 import { createPost } from "../actions";
 
 export default async function NewBlogPostPage({
@@ -28,6 +29,17 @@ export default async function NewBlogPostPage({
           <select name="status" defaultValue="draft" className="rounded-md border px-3 py-2 w-40">
             <option value="draft">초안</option>
             <option value="published">발행</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          카테고리
+          <select name="category" defaultValue="" className="rounded-md border px-3 py-2 w-40">
+            <option value="">없음</option>
+            {BLOG_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.value}
+              </option>
+            ))}
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm">

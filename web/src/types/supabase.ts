@@ -41,6 +41,7 @@ export type Database = {
     Tables: {
       blog_posts: {
         Row: {
+          category: string | null
           content: Json
           created_at: string | null
           id: string
@@ -49,8 +50,10 @@ export type Database = {
           status: string
           title: string
           updated_at: string | null
+          view_count: number
         }
         Insert: {
+          category?: string | null
           content: Json
           created_at?: string | null
           id?: string
@@ -59,8 +62,10 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string | null
+          view_count?: number
         }
         Update: {
+          category?: string | null
           content?: Json
           created_at?: string | null
           id?: string
@@ -69,6 +74,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string | null
+          view_count?: number
         }
         Relationships: []
       }
@@ -280,6 +286,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_blog_view: { Args: { post_slug: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {

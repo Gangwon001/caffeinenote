@@ -8,6 +8,7 @@ export async function createPost(formData: FormData) {
   const title = formData.get("title") as string;
   const slug = formData.get("slug") as string;
   const status = formData.get("status") as string;
+  const category = (formData.get("category") as string) || null;
   const content = JSON.parse((formData.get("content") as string) || "{}");
 
   const supabase = await createClient();
@@ -15,6 +16,7 @@ export async function createPost(formData: FormData) {
     title,
     slug,
     status,
+    category,
     content,
     published_at: status === "published" ? new Date().toISOString() : null,
   });
@@ -31,6 +33,7 @@ export async function updatePost(id: string, formData: FormData) {
   const title = formData.get("title") as string;
   const slug = formData.get("slug") as string;
   const status = formData.get("status") as string;
+  const category = (formData.get("category") as string) || null;
   const content = JSON.parse((formData.get("content") as string) || "{}");
 
   const supabase = await createClient();
@@ -47,6 +50,7 @@ export async function updatePost(id: string, formData: FormData) {
       title,
       slug,
       status,
+      category,
       content,
       updated_at: new Date().toISOString(),
       published_at:

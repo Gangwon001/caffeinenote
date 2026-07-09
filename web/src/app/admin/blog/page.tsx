@@ -26,7 +26,9 @@ export default async function AdminBlogPage() {
           <tr className="border-b text-left">
             <th className="py-2 pr-4">제목</th>
             <th className="py-2 pr-4">slug</th>
+            <th className="py-2 pr-4">카테고리</th>
             <th className="py-2 pr-4">상태</th>
+            <th className="py-2 pr-4">조회수</th>
             <th className="py-2 pr-4"></th>
           </tr>
         </thead>
@@ -35,7 +37,9 @@ export default async function AdminBlogPage() {
             <tr key={post.id} className="border-b">
               <td className="py-2 pr-4">{post.title}</td>
               <td className="py-2 pr-4">{post.slug}</td>
+              <td className="py-2 pr-4">{post.category ?? "-"}</td>
               <td className="py-2 pr-4">{post.status === "published" ? "발행" : "초안"}</td>
+              <td className="py-2 pr-4 tabular-nums">{post.view_count}</td>
               <td className="py-2 pr-4 flex gap-3">
                 <Link href={`/admin/blog/${post.id}/edit`} className="text-brand underline">
                   수정

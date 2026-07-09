@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { JSONContent } from "@tiptap/react";
 import TiptapEditor from "@/components/admin/TiptapEditor";
 import { createClient } from "@/lib/supabase/server";
+import { BLOG_CATEGORIES } from "@/lib/blog-categories";
 import { updatePost } from "../../actions";
 
 export default async function EditBlogPostPage({
@@ -56,6 +57,21 @@ export default async function EditBlogPostPage({
           >
             <option value="draft">초안</option>
             <option value="published">발행</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          카테고리
+          <select
+            name="category"
+            defaultValue={post.category ?? ""}
+            className="rounded-md border px-3 py-2 w-40"
+          >
+            <option value="">없음</option>
+            {BLOG_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.value}
+              </option>
+            ))}
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm">

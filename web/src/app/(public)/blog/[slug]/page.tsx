@@ -47,6 +47,8 @@ export default async function BlogPostPage({
   }
 
   const supabase = await createClient();
+  await supabase.rpc("increment_blog_view", { post_slug: slug });
+
   const { data: popularPosts } = await supabase
     .from("blog_posts")
     .select("id, title, slug")

@@ -68,3 +68,15 @@ export function renderTiptapContent(doc: unknown): string {
   if (!doc || typeof doc !== "object") return "";
   return renderNode(doc as TiptapNode);
 }
+
+function extractText(node: TiptapNode): string {
+  if (node.type === "text") return node.text ?? "";
+  const children = (node.content ?? []).map(extractText).join(" ");
+  return node.type === "paragraph" || node.type === "heading" ? `${children} ` : children;
+}
+
+export function extractTiptapExcerpt(doc: unknown, maxLength = 90): string {
+  if (!doc || typeof doc !== "object") return "";
+  const text = extractText(doc as TiptapNode).replace(/\s+/g, " ").trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
+}
