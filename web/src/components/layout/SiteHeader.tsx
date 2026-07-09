@@ -16,6 +16,16 @@ export default async function SiteHeader() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let isAdmin = false;
+  if (user) {
+    const { data: roleRow } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    isAdmin = roleRow?.role === "admin";
+  }
+
   const authControls = user ? (
     <form action={logout}>
       <button type="submit" className="text-sm font-medium hover:text-brand">
@@ -53,6 +63,11 @@ export default async function SiteHeader() {
               {link.label}
             </Link>
           ))}
+          {isAdmin && (
+            <Link href="/admin" className="text-brand hover:underline">
+              관리자
+            </Link>
+          )}
         </nav>
 
         <div className="hidden md:block">{authControls}</div>
