@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg: #f7f5ef;
-  --color-ink: #1f2a24;
-  --color-brand: #3d6b52;
-  --color-brand-soft: #c9d9c6;
+  --color-bg: #f6f7f8;
+  --color-ink: #333333;
+  --color-brand: #0f5b3a;
+  --color-brand-soft: #e8f4ec;
   --color-day: #e8a94c;
   --color-night: #364b7c;
   --color-danger: #b85c4a;

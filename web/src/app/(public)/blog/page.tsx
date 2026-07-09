@@ -16,7 +16,7 @@ export default async function BlogListPage() {
       {posts && posts.length > 0 ? (
         <ul className="flex flex-col gap-4">
           {posts.map((post) => (
-            <li key={post.id} className="rounded-lg border border-brand-soft p-4">
+            <li key={post.id} className="rounded-lg border border-ink/10 p-4">
               <Link href={`/blog/${post.slug}`} className="font-display text-lg font-bold hover:underline">
                 {post.title}
               </Link>

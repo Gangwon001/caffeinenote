@@ -11,7 +11,7 @@ export default function DrinkCard({ drink }: { drink: Drink }) {
   const brandSlug = drink.brands?.slug;
 
   const card = (
-    <div className="rounded-xl border border-brand-soft bg-brand-soft/10 p-4 hover:shadow-sm transition-shadow h-full">
+    <div className="rounded-xl border border-ink/10 bg-brand-soft/10 p-4 hover:shadow-sm transition-shadow h-full">
       <p className="text-xs text-ink/60">{drink.brands?.name}</p>
       <h3 className="font-display font-bold mt-1">
         {drink.name_ko}

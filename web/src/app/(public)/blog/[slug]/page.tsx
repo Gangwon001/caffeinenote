@@ -59,7 +59,7 @@ export default async function BlogPostPage({
     <main className="flex-1 p-8 max-w-5xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-8 items-start">
         <article className="flex flex-col gap-4 min-w-0">
-          <div className="rounded-md bg-brand-soft/30 border border-brand-soft p-4 text-sm text-ink/80">
+          <div className="rounded-md bg-brand-soft/30 border border-ink/10 p-4 text-sm text-ink/80">
             이 글은 일반적인 정보 제공을 목적으로 하며 의학적 조언이 아닙니다. 개인의 건강 상태에
             따라 전문가와 상담해주세요.
           </div>
@@ -73,7 +73,7 @@ export default async function BlogPostPage({
         </article>
 
         <aside className="sticky top-20 flex flex-col gap-4">
-          <div className="rounded-lg border border-brand-soft p-4">
+          <div className="rounded-lg border border-ink/10 p-4">
             <h2 className="font-display font-bold mb-2">바로가기</h2>
             <ul className="flex flex-col gap-1 text-sm">
               <li>
@@ -89,12 +89,12 @@ export default async function BlogPostPage({
             </ul>
           </div>
 
-          <div className="rounded-lg border border-dashed border-brand-soft p-4 text-center text-sm text-ink/50">
+          <div className="rounded-lg border border-dashed border-ink/10 p-4 text-center text-sm text-ink/50">
             광고 영역
           </div>
 
           {popularPosts && popularPosts.length > 0 && (
-            <div className="rounded-lg border border-brand-soft p-4">
+            <div className="rounded-lg border border-ink/10 p-4">
               <h2 className="font-display font-bold mb-2">인기글</h2>
               <ul className="flex flex-col gap-1 text-sm">
                 {popularPosts.map((p) => (

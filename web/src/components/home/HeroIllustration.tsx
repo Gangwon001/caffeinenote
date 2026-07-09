@@ -35,6 +35,16 @@ export default function HeroIllustration() {
         fill="var(--color-bg)"
         opacity="0.9"
       />
+
+      {/* leaves */}
+      <g fill="var(--color-brand)" opacity="0.55">
+        <path d="M46 236c30-4 46-28 50-56-30 4-52 24-50 56z" />
+        <path d="M46 236c22-14 32-34 30-58" fill="none" stroke="var(--color-bg)" strokeWidth="2" />
+      </g>
+      <g fill="var(--color-brand)" opacity="0.45">
+        <path d="M274 118c-30 2-48 24-54 52 30-2 54-20 54-52z" />
+        <path d="M274 118c-24 12-36 30-36 54" fill="none" stroke="var(--color-bg)" strokeWidth="2" />
+      </g>
     </svg>
   );
 }

@@ -114,15 +114,15 @@ export default async function DrinkDetailPage({
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-lg border border-brand-soft p-4 text-center">
+        <div className="rounded-lg border border-ink/10 p-4 text-center">
           <p className="text-2xl font-bold tabular-nums">{nutrition?.caffeine_mg ?? "-"}</p>
           <p className="text-sm text-ink/60">카페인mg</p>
         </div>
-        <div className="rounded-lg border border-brand-soft p-4 text-center">
+        <div className="rounded-lg border border-ink/10 p-4 text-center">
           <p className="text-2xl font-bold tabular-nums">{nutrition?.calories_kcal ?? "-"}</p>
           <p className="text-sm text-ink/60">칼로리kcal</p>
         </div>
-        <div className="rounded-lg border border-brand-soft p-4 text-center">
+        <div className="rounded-lg border border-ink/10 p-4 text-center">
           <p className="text-2xl font-bold tabular-nums">{nutrition?.sugar_g ?? "-"}</p>
           <p className="text-sm text-ink/60">당류g</p>
         </div>

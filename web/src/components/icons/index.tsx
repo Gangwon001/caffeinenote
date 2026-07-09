@@ -49,3 +49,20 @@ export function BookIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...strokeProps}>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="M19 19l-4-4" />
+    </svg>
+  );
+}
+
+export function ChevronIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...strokeProps}>
+      <path d="M9 5l7 7-7 7" />
+    </svg>
+  );
+}

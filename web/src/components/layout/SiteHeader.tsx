@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/lib/auth-actions";
+import { CupIcon } from "@/components/icons";
 
 const NAV_LINKS = [
   { href: "/drinks", label: "음료 검색" },
@@ -36,10 +37,11 @@ export default async function SiteHeader() {
   );
 
   return (
-    <header className="border-b border-brand-soft">
+    <header className="border-b border-ink/10">
       <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/" className="font-display text-lg font-bold text-brand">
+          <Link href="/" className="font-display text-lg font-bold text-brand flex items-center gap-2">
+            <CupIcon className="w-6 h-6" />
             카페인노트
           </Link>
           <div className="md:hidden">{authControls}</div>

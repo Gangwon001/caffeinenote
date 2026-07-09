@@ -162,7 +162,7 @@ export default function CaffeineCalculator({
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="아메리카노"
             list="calculator-drink-catalog"
-            className="rounded-md border border-brand-soft bg-bg px-3 py-2 w-40"
+            className="rounded-md border border-ink/10 bg-bg px-3 py-2 w-40"
           />
           <datalist id="calculator-drink-catalog">
             {catalogDrinks.map((d) => (
@@ -177,7 +177,7 @@ export default function CaffeineCalculator({
             value={draftCaffeine}
             onChange={(e) => setDraftCaffeine(e.target.value)}
             placeholder="150"
-            className="rounded-md border border-brand-soft bg-bg px-3 py-2 w-28"
+            className="rounded-md border border-ink/10 bg-bg px-3 py-2 w-28"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -186,7 +186,7 @@ export default function CaffeineCalculator({
             type="datetime-local"
             value={draftConsumedAt}
             onChange={(e) => setDraftConsumedAt(e.target.value)}
-            className="rounded-md border border-brand-soft bg-bg px-3 py-2"
+            className="rounded-md border border-ink/10 bg-bg px-3 py-2"
           />
         </label>
         <button
@@ -203,7 +203,7 @@ export default function CaffeineCalculator({
           {entries.map((entry) => (
             <li
               key={entry.id}
-              className="flex items-center justify-between rounded-md border border-brand-soft/60 px-3 py-2 text-sm"
+              className="flex items-center justify-between rounded-md border border-ink/15 px-3 py-2 text-sm"
             >
               <span>
                 {entry.name} · {entry.caffeineMg}mg ·{" "}
@@ -227,14 +227,14 @@ export default function CaffeineCalculator({
           type="time"
           value={bedtime}
           onChange={(e) => setBedtime(e.target.value)}
-          className="rounded-md border border-brand-soft bg-bg px-3 py-2"
+          className="rounded-md border border-ink/10 bg-bg px-3 py-2"
         />
       </label>
 
       {entries.length === 0 ? (
         <p className="text-ink/60 text-sm">음료를 추가하면 취침 시각 기준 잔존 카페인을 계산해드려요.</p>
       ) : (
-        <div className="rounded-xl border border-brand-soft bg-brand-soft/10 p-6 flex flex-col gap-4">
+        <div className="rounded-xl border border-ink/10 bg-brand-soft/10 p-6 flex flex-col gap-4">
           <div>
             <p className="text-sm text-ink/60">취침 시각({formatTime(bedtimeDate)}) 예상 잔존 카페인</p>
             <p className="text-3xl font-bold tabular-nums">{remainingAtBedtime.toFixed(0)}mg</p>

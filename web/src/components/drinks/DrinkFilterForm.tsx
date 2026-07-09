@@ -83,10 +83,10 @@ export default function DrinkFilterForm({
           onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
           placeholder="음료 이름으로 검색"
           autoComplete="off"
-          className="w-full rounded-md border border-brand-soft bg-bg px-3 py-2"
+          className="w-full rounded-md border border-ink/10 bg-bg px-3 py-2"
         />
         {showDropdown && (matches.length > 0 || (!query && recentSearches.length > 0)) && (
-          <ul className="absolute z-10 mt-1 w-full rounded-md border border-brand-soft bg-bg shadow-sm overflow-hidden">
+          <ul className="absolute z-10 mt-1 w-full rounded-md border border-ink/10 bg-bg shadow-sm overflow-hidden">
             {(query ? matches : recentSearches).map((item) => (
               <li key={item}>
                 <button
@@ -108,7 +108,7 @@ export default function DrinkFilterForm({
           <select
             name="brand"
             defaultValue={defaults.brand ?? ""}
-            className="rounded-md border border-brand-soft bg-bg px-3 py-2"
+            className="rounded-md border border-ink/10 bg-bg px-3 py-2"
           >
             <option value="">전체</option>
             {brands.map((b) => (
@@ -123,7 +123,7 @@ export default function DrinkFilterForm({
           <select
             name="size"
             defaultValue={defaults.size ?? ""}
-            className="rounded-md border border-brand-soft bg-bg px-3 py-2"
+            className="rounded-md border border-ink/10 bg-bg px-3 py-2"
           >
             <option value="">전체</option>
             {sizes.map((size) => (
@@ -139,7 +139,7 @@ export default function DrinkFilterForm({
             type="number"
             name="caffeine_min"
             defaultValue={defaults.caffeine_min ?? ""}
-            className="w-28 rounded-md border border-brand-soft bg-bg px-3 py-2"
+            className="w-28 rounded-md border border-ink/10 bg-bg px-3 py-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -148,7 +148,7 @@ export default function DrinkFilterForm({
             type="number"
             name="caffeine_max"
             defaultValue={defaults.caffeine_max ?? ""}
-            className="w-28 rounded-md border border-brand-soft bg-bg px-3 py-2"
+            className="w-28 rounded-md border border-ink/10 bg-bg px-3 py-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -157,7 +157,7 @@ export default function DrinkFilterForm({
             type="number"
             name="sugar_min"
             defaultValue={defaults.sugar_min ?? ""}
-            className="w-24 rounded-md border border-brand-soft bg-bg px-3 py-2"
+            className="w-24 rounded-md border border-ink/10 bg-bg px-3 py-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -166,7 +166,7 @@ export default function DrinkFilterForm({
             type="number"
             name="sugar_max"
             defaultValue={defaults.sugar_max ?? ""}
-            className="w-24 rounded-md border border-brand-soft bg-bg px-3 py-2"
+            className="w-24 rounded-md border border-ink/10 bg-bg px-3 py-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -175,7 +175,7 @@ export default function DrinkFilterForm({
             type="number"
             name="cal_min"
             defaultValue={defaults.cal_min ?? ""}
-            className="w-24 rounded-md border border-brand-soft bg-bg px-3 py-2"
+            className="w-24 rounded-md border border-ink/10 bg-bg px-3 py-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -184,7 +184,7 @@ export default function DrinkFilterForm({
             type="number"
             name="cal_max"
             defaultValue={defaults.cal_max ?? ""}
-            className="w-24 rounded-md border border-brand-soft bg-bg px-3 py-2"
+            className="w-24 rounded-md border border-ink/10 bg-bg px-3 py-2"
           />
         </label>
         <button
