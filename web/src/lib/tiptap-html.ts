@@ -1,5 +1,6 @@
 interface TiptapMark {
   type: string;
+  attrs?: Record<string, unknown>;
 }
 
 interface TiptapNode {
@@ -32,8 +33,15 @@ function renderMarks(text: string, marks: TiptapMark[] = []): string {
       case "code":
         return `<code>${acc}</code>`;
       case "link": {
-        const href = (mark as unknown as { attrs?: { href?: string } }).attrs?.href ?? "";
+        const href = String(mark.attrs?.href ?? "");
         return `<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${acc}</a>`;
+      }
+      case "textStyle": {
+        const styles: string[] = [];
+        if (mark.attrs?.fontFamily) styles.push(`font-family:${mark.attrs.fontFamily}`);
+        if (mark.attrs?.fontSize) styles.push(`font-size:${mark.attrs.fontSize}`);
+        if (!styles.length) return acc;
+        return `<span style="${escapeAttr(styles.join(";"))}">${acc}</span>`;
       }
       default:
         return acc;

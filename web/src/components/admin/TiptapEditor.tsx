@@ -11,9 +11,28 @@ import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import Youtube from "@tiptap/extension-youtube";
+import { TextStyle, FontFamily, FontSize } from "@tiptap/extension-text-style";
 import { marked } from "marked";
 import { useRef, useState } from "react";
 import { uploadBlogImage } from "@/lib/upload-blog-image";
+
+const FONT_FAMILIES = [
+  { label: "기본", value: "" },
+  { label: "고딕체", value: "var(--font-sans)" },
+  { label: "명조체", value: "var(--font-display)" },
+  { label: "고정폭", value: "monospace" },
+];
+
+const FONT_SIZES = [
+  { label: "기본", value: "" },
+  { label: "12px", value: "12px" },
+  { label: "14px", value: "14px" },
+  { label: "16px", value: "16px" },
+  { label: "18px", value: "18px" },
+  { label: "20px", value: "20px" },
+  { label: "24px", value: "24px" },
+  { label: "32px", value: "32px" },
+];
 
 const EMPTY_DOC: JSONContent = { type: "doc", content: [{ type: "paragraph" }] };
 
@@ -75,6 +94,9 @@ export default function TiptapEditor({
       TableHeader,
       TableCell,
       Youtube.configure({ controls: true, nocookie: true }),
+      TextStyle,
+      FontFamily,
+      FontSize,
     ],
     content: initialContent ?? EMPTY_DOC,
     immediatelyRender: false,
@@ -144,9 +166,45 @@ export default function TiptapEditor({
     }
   }
 
+  const currentFontFamily = editor.getAttributes("textStyle").fontFamily ?? "";
+  const currentFontSize = editor.getAttributes("textStyle").fontSize ?? "";
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-1.5 sticky top-0 bg-bg z-10 py-1">
+        <select
+          title="글꼴"
+          value={currentFontFamily}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value) editor.chain().focus().setFontFamily(value).run();
+            else editor.chain().focus().unsetFontFamily().run();
+          }}
+          className="rounded border px-1.5 py-1 text-sm bg-bg"
+        >
+          {FONT_FAMILIES.map((f) => (
+            <option key={f.label} value={f.value}>
+              {f.label}
+            </option>
+          ))}
+        </select>
+        <select
+          title="글자 크기"
+          value={currentFontSize}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value) editor.chain().focus().setFontSize(value).run();
+            else editor.chain().focus().unsetFontSize().run();
+          }}
+          className="rounded border px-1.5 py-1 text-sm bg-bg"
+        >
+          {FONT_SIZES.map((f) => (
+            <option key={f.label} value={f.value}>
+              {f.label}
+            </option>
+          ))}
+        </select>
+
         <ToolbarButton
           title="굵게"
           active={editor.isActive("bold")}
