@@ -3,13 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { extractTiptapExcerpt } from "@/lib/tiptap-html";
 
-export async function createPost(formData: FormData) {
+export async function createPost(status: "draft" | "published", formData: FormData) {
   const title = formData.get("title") as string;
   const slug = formData.get("slug") as string;
-  const status = formData.get("status") as string;
   const category = (formData.get("category") as string) || null;
+  const cover_image_url = (formData.get("cover_image_url") as string) || null;
   const content = JSON.parse((formData.get("content") as string) || "{}");
+  const excerpt = (formData.get("excerpt") as string) || extractTiptapExcerpt(content);
 
   const supabase = await createClient();
   const { error } = await supabase.from("blog_posts").insert({
@@ -17,6 +19,8 @@ export async function createPost(formData: FormData) {
     slug,
     status,
     category,
+    cover_image_url,
+    excerpt,
     content,
     published_at: status === "published" ? new Date().toISOString() : null,
   });
@@ -29,12 +33,17 @@ export async function createPost(formData: FormData) {
   redirect("/admin/blog");
 }
 
-export async function updatePost(id: string, formData: FormData) {
+export async function updatePost(
+  id: string,
+  status: "draft" | "published",
+  formData: FormData,
+) {
   const title = formData.get("title") as string;
   const slug = formData.get("slug") as string;
-  const status = formData.get("status") as string;
   const category = (formData.get("category") as string) || null;
+  const cover_image_url = (formData.get("cover_image_url") as string) || null;
   const content = JSON.parse((formData.get("content") as string) || "{}");
+  const excerpt = (formData.get("excerpt") as string) || extractTiptapExcerpt(content);
 
   const supabase = await createClient();
 
@@ -51,6 +60,8 @@ export async function updatePost(id: string, formData: FormData) {
       slug,
       status,
       category,
+      cover_image_url,
+      excerpt,
       content,
       updated_at: new Date().toISOString(),
       published_at:

@@ -43,7 +43,9 @@ export type Database = {
         Row: {
           category: string | null
           content: Json
+          cover_image_url: string | null
           created_at: string | null
+          excerpt: string | null
           id: string
           published_at: string | null
           slug: string
@@ -55,7 +57,9 @@ export type Database = {
         Insert: {
           category?: string | null
           content: Json
+          cover_image_url?: string | null
           created_at?: string | null
+          excerpt?: string | null
           id?: string
           published_at?: string | null
           slug: string
@@ -67,7 +71,9 @@ export type Database = {
         Update: {
           category?: string | null
           content?: Json
+          cover_image_url?: string | null
           created_at?: string | null
+          excerpt?: string | null
           id?: string
           published_at?: string | null
           slug?: string

@@ -86,15 +86,24 @@ export default async function BlogListPage({
                     href={`/blog/${post.slug}`}
                     className="flex gap-4 rounded-lg border border-ink/10 p-4 hover:shadow-sm transition-shadow"
                   >
-                    <div
-                      className="w-32 sm:w-40 h-24 shrink-0 rounded-md flex items-center justify-center"
-                      style={{
-                        backgroundColor: style?.bg ?? "#E8F4EC",
-                        color: style?.color ?? "#0F5B3A",
-                      }}
-                    >
-                      <BookIcon className="w-8 h-8" />
-                    </div>
+                    {post.cover_image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={post.cover_image_url}
+                        alt=""
+                        className="w-32 sm:w-40 h-24 shrink-0 rounded-md object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="w-32 sm:w-40 h-24 shrink-0 rounded-md flex items-center justify-center"
+                        style={{
+                          backgroundColor: style?.bg ?? "#E8F4EC",
+                          color: style?.color ?? "#0F5B3A",
+                        }}
+                      >
+                        <BookIcon className="w-8 h-8" />
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       {post.category && (
                         <span
@@ -106,7 +115,7 @@ export default async function BlogListPage({
                       )}
                       <h2 className="font-bold">{post.title}</h2>
                       <p className="text-sm text-ink/70 mt-1 line-clamp-2">
-                        {extractTiptapExcerpt(post.content)}
+                        {post.excerpt || extractTiptapExcerpt(post.content)}
                       </p>
                       <div className="flex items-center gap-2 text-xs text-ink/50 mt-2">
                         <span>{formatDate(post.published_at)}</span>

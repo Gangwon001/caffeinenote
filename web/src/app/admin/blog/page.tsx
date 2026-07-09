@@ -2,12 +2,32 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { deletePost } from "./actions";
 
-export default async function AdminBlogPage() {
+const STATUS_TABS = [
+  { value: "", label: "전체" },
+  { value: "draft", label: "초안" },
+  { value: "published", label: "발행" },
+] as const;
+
+export default async function AdminBlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; q?: string }>;
+}) {
+  const filters = await searchParams;
   const supabase = await createClient();
-  const { data: posts } = await supabase
+  const { data: allPosts } = await supabase
     .from("blog_posts")
     .select("*")
     .order("created_at", { ascending: false });
+
+  let posts = allPosts ?? [];
+  if (filters.status) {
+    posts = posts.filter((post) => post.status === filters.status);
+  }
+  if (filters.q) {
+    const q = filters.q.toLowerCase();
+    posts = posts.filter((post) => post.title.toLowerCase().includes(q));
+  }
 
   return (
     <main className="flex-1 p-8 flex flex-col gap-6">
@@ -21,6 +41,35 @@ export default async function AdminBlogPage() {
         </Link>
       </div>
 
+      <form method="get" className="flex flex-wrap items-center gap-3">
+        <div className="flex gap-2">
+          {STATUS_TABS.map((tab) => (
+            <Link
+              key={tab.value}
+              href={`/admin/blog${tab.value ? `?status=${tab.value}` : ""}`}
+              className={`rounded-md px-3 py-1.5 text-sm border ${
+                (filters.status ?? "") === tab.value
+                  ? "bg-brand text-bg border-brand"
+                  : "hover:bg-brand-soft"
+              }`}
+            >
+              {tab.label}
+            </Link>
+          ))}
+        </div>
+        <input
+          type="search"
+          name="q"
+          defaultValue={filters.q ?? ""}
+          placeholder="제목 검색"
+          className="rounded-md border px-3 py-1.5 text-sm"
+        />
+        {filters.status && <input type="hidden" name="status" value={filters.status} />}
+        <button type="submit" className="rounded-md border px-3 py-1.5 text-sm hover:bg-brand-soft">
+          검색
+        </button>
+      </form>
+
       <table className="w-full text-sm border-collapse">
         <thead>
           <tr className="border-b text-left">
@@ -33,7 +82,7 @@ export default async function AdminBlogPage() {
           </tr>
         </thead>
         <tbody>
-          {posts?.map((post) => (
+          {posts.map((post) => (
             <tr key={post.id} className="border-b">
               <td className="py-2 pr-4">{post.title}</td>
               <td className="py-2 pr-4">{post.slug}</td>

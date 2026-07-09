@@ -26,11 +26,17 @@ export async function generateMetadata({
   if (!post) return {};
 
   const canonical = `/blog/${slug}`;
+  const description = post.excerpt || post.title;
   return {
     title: `${post.title} | 카페인노트 블로그`,
-    description: post.title,
+    description,
     alternates: { canonical },
-    openGraph: { title: post.title, url: canonical },
+    openGraph: {
+      title: post.title,
+      description,
+      url: canonical,
+      ...(post.cover_image_url && { images: [post.cover_image_url] }),
+    },
   };
 }
 
@@ -67,6 +73,15 @@ export default async function BlogPostPage({
           </div>
 
           <h1 className="font-display text-2xl font-bold">{post.title}</h1>
+
+          {post.cover_image_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={post.cover_image_url}
+              alt=""
+              className="w-full max-h-80 object-cover rounded-lg"
+            />
+          )}
 
           <div
             className="blog-content"

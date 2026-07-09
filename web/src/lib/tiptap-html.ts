@@ -14,6 +14,10 @@ function escapeHtml(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function escapeAttr(value: string): string {
+  return escapeHtml(value).replace(/"/g, "&quot;");
+}
+
 function renderMarks(text: string, marks: TiptapMark[] = []): string {
   return marks.reduce((acc, mark) => {
     switch (mark.type) {
@@ -21,14 +25,25 @@ function renderMarks(text: string, marks: TiptapMark[] = []): string {
         return `<strong>${acc}</strong>`;
       case "italic":
         return `<em>${acc}</em>`;
+      case "underline":
+        return `<u>${acc}</u>`;
       case "strike":
         return `<s>${acc}</s>`;
       case "code":
         return `<code>${acc}</code>`;
+      case "link": {
+        const href = (mark as unknown as { attrs?: { href?: string } }).attrs?.href ?? "";
+        return `<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${acc}</a>`;
+      }
       default:
         return acc;
     }
   }, escapeHtml(text));
+}
+
+function alignStyle(node: TiptapNode): string {
+  const align = node.attrs?.textAlign;
+  return align && align !== "left" ? ` style="text-align:${align}"` : "";
 }
 
 function renderNode(node: TiptapNode): string {
@@ -38,10 +53,10 @@ function renderNode(node: TiptapNode): string {
     case "doc":
       return children;
     case "paragraph":
-      return `<p>${children}</p>`;
+      return `<p${alignStyle(node)}>${children}</p>`;
     case "heading": {
       const level = Number(node.attrs?.level) || 2;
-      return `<h${level}>${children}</h${level}>`;
+      return `<h${level}${alignStyle(node)}>${children}</h${level}>`;
     }
     case "bulletList":
       return `<ul>${children}</ul>`;
@@ -57,6 +72,25 @@ function renderNode(node: TiptapNode): string {
       return "<br />";
     case "horizontalRule":
       return "<hr />";
+    case "image": {
+      const src = String(node.attrs?.src ?? "");
+      const alt = String(node.attrs?.alt ?? "");
+      return `<img src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" />`;
+    }
+    case "table":
+      return `<table><tbody>${children}</tbody></table>`;
+    case "tableRow":
+      return `<tr>${children}</tr>`;
+    case "tableCell":
+      return `<td>${children}</td>`;
+    case "tableHeader":
+      return `<th>${children}</th>`;
+    case "youtube": {
+      const src = String(node.attrs?.src ?? "");
+      const width = node.attrs?.width ?? 640;
+      const height = node.attrs?.height ?? 360;
+      return `<iframe src="${escapeAttr(src)}" width="${width}" height="${height}" allowfullscreen></iframe>`;
+    }
     case "text":
       return renderMarks(node.text ?? "", node.marks);
     default:
