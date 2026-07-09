@@ -38,7 +38,7 @@
 | 경로 | 역할 | 인증 |
 |---|---|---|
 | `/` | 홈: 검색 히어로, 인기 브랜드, 계산기 진입, 최신 글 | 비회원 |
-| `/drinks` | 전체 음료 검색 (카페인/칼로리/당류 필터) | 비회원 |
+| `/drinks` | 전체 음료 검색 (브랜드/사이즈/카페인/칼로리/당류 필터) | 비회원 |
 | `/brands/[brand]` | 브랜드별 메뉴 목록 | 비회원 |
 | `/drinks/[brand]/[slug]` | 메뉴 상세 (SEO 핵심 페이지) | 비회원 |
 | `/calculator/caffeine` | 카페인 계산기 (반감기 기반 잔존량) | 비회원 |
@@ -54,7 +54,11 @@
 
 ## 3. 디자인 시스템
 
-와이어프레임의 방향(세이지 그린 + 크림 배경, 카드형 UI)은 유지하되,
+> **업데이트**: `raw/UI guide/` 폴더의 실제 와이어프레임 이미지(홈 화면, 블로그 페이지)가
+> 제공된 이후로는, 이 문서의 서술형 디자인 지침보다 **와이어프레임 이미지가 우선**한다.
+> 아래 3.2 컬러 토큰은 와이어프레임 실물 스와치 기준으로 갱신된 값이다.
+
+와이어프레임의 방향(그린 계열 + 밝은 배경, 카드형 UI)은 유지하되,
 흔한 AI 생성 톤(크림+테라코타, 혹은 다크+네온 그린)으로 흐르지 않도록 아래 토큰을 그대로 따른다.
 
 ### 3.1 컨셉: "낮 → 밤"의 하루 흐름
@@ -65,16 +69,22 @@
 
 ### 3.2 컬러 토큰
 ```
---color-bg:        #F7F5EF   /* 웜 오프화이트, 종이 질감 느낌 */
---color-ink:        #1F2A24   /* 거의 검정에 가까운 딥 그린 (본문 텍스트) */
---color-brand:      #3D6B52   /* 딥 세이지 그린, 로고/주요 CTA */
---color-brand-soft: #C9D9C6   /* 연한 세이지, 카드 배경/보더 */
---color-day:         #E8A94C   /* 카페인/낮 – 앰버 */
---color-night:       #364B7C   /* 수면/밤 – 인디고 */
+--color-bg:        #F6F7F8   /* Background — 와이어프레임 기준 */
+--color-ink:        #333333   /* Text — 와이어프레임 기준 */
+--color-brand:      #0F5B3A   /* Primary — 로고/주요 CTA */
+--color-brand-soft: #E8F4EC   /* Secondary — 카드 배경/아이콘 원형 배경 */
+--color-day:         #E8A94C   /* 카페인/낮 – 앰버 (계산기 시그니처 요소 전용) */
+--color-night:       #364B7C   /* 수면/밤 – 인디고 (계산기 시그니처 요소 전용) */
 --color-danger:      #B85C4A   /* 경고/한도초과 표시 전용, 장식적 사용 금지 */
 ```
-→ 흔한 테라코타(#D97757) 액센트는 사용하지 않는다. 대신 day/night 두 액센트만
-"시간대"를 의미할 때만 제한적으로 사용한다.
+→ 흔한 테라코타(#D97757) 액센트는 사용하지 않는다. day/night 두 액센트는
+"시간대"를 의미할 때(계산기 타임라인, 대시보드 게이지 등)만 제한적으로 사용한다.
+→ 카드 테두리처럼 배경과 대비가 필요한 hairline border는 `--color-brand-soft`가 아니라
+`ink`의 낮은 투명도(예: `border-ink/10`)를 사용한다 — brand-soft는 배경과 명도차가 거의 없어
+테두리로 쓰면 사실상 안 보인다.
+→ 홈/블로그 2×2·리스트 카드의 아이콘은 카드마다 각기 다른 파스텔 톤(초록/보라/파랑/주황 등)을
+와이어프레임 그대로 사용해도 된다 — 이 경우는 "시간대 의미"가 아니라 카테고리 구분 목적이므로
+day/night 제한 규칙과 별개다.
 
 ### 3.3 타이포그래피
 - 디스플레이(제목): 굵은 세리프 또는 슬랩세리프 계열 1종 (예: Noto Serif KR Bold) — 브랜드 신뢰감
@@ -162,10 +172,27 @@ create table blog_posts (
   slug text unique not null,
   content jsonb not null,          -- Tiptap JSON
   status text not null default 'draft' check (status in ('draft','published')),
+  category text check (category in ('카페인','수면','건강','라이프스타일','리뷰','가이드')),
+  view_count integer not null default 0,
   published_at timestamptz,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- 비회원도 조회수를 올릴 수 있어야 하지만 blog_posts 쓰기는 관리자 전용이므로,
+-- 조회수 증가만 허용하는 좁은 범위의 SECURITY DEFINER 함수로 우회한다.
+create function public.increment_blog_view(post_slug text)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update blog_posts
+  set view_count = view_count + 1
+  where slug = post_slug and status = 'published';
+$$;
+
+grant execute on function public.increment_blog_view(text) to anon, authenticated;
 ```
 > RLS(Row Level Security)는 `user_drink_logs`, `favorites`, `user_settings`에
 > 반드시 `auth.uid() = user_id` 조건으로 적용할 것.
@@ -180,13 +207,18 @@ create table blog_posts (
 ## 5. 페이지별 상세 요구사항
 
 ### 홈 (`/`)
-- 히어로: "오늘 마신 커피, 밤에 잠을 방해할까요?" 톤의 메시지 + 중앙 검색창
-- 인기 검색어 chip (아메리카노, 라떼, 디카페인 등)
-- 2×2 기능 카드: 검색 / 수면계산 / 내 기록 / 블로그
-- 최신 글 4개 미리보기
+- 헤더: 로고(아이콘+워드마크) + 메뉴(음료 검색/수면 계산/블로그/내 기록) + 로그인/회원가입
+  (로그인 시 로그아웃으로 전환, 관리자 계정에는 "관리자" 메뉴 추가 노출)
+- 히어로: "오늘 마신 커피, 밤에 잠을 방해할까요?" 톤의 메시지(강조 단어는 brand 컬러) +
+  브랜드 톤 일러스트(실사진 아님, SVG)
+- **3단계 검색**: 브랜드 → 사이즈 → 메뉴명 순으로 단계별 드롭다운/입력창, `/drinks`로 이동
+- 인기 검색어 chip (아메리카노, 라떼, 바닐라 라떼, 녹차, 디카페인, 콜드브루 등)
+- 2×2 기능 카드: 검색 / 수면계산 / 내 기록 / 블로그, 카드마다 다른 색 아이콘 원형 배경 +
+  우측 화살표(">")
+- 최신 글 4개 미리보기(날짜 포함) + "전체 글 보기" 링크
 
 ### 음료 검색 (`/drinks`)
-- 필터: 브랜드, 카페인 범위, 당류 범위, 칼로리 범위
+- 필터: 브랜드, 사이즈, 카페인 범위, 당류 범위, 칼로리 범위
 - 검색어 자동완성 + 최근 검색어 로컬 저장(비회원도 가능, localStorage)
 - 결과 카드: 이름 / 카페인mg / kcal / 당류g 한눈에
 
@@ -210,9 +242,19 @@ create table blog_posts (
 - 개인 설정: 일일 권장량, 취침시각, 민감도
 - 임신부/청소년 등 민감군 안내는 별도 정보성 문구로, 진단성 표현 금지
 
-### 블로그 (`/blog/[slug]`)
+### 블로그 목록 (`/blog`)
+- 히어로: 제목 + 설명 + 일러스트
+- 검색창(제목 검색) + 카테고리 필터 pill(전체/카페인/수면/건강/라이프스타일/리뷰/가이드) +
+  정렬(최신순/인기순=조회수)
+- 글 카드(세로 리스트): 카테고리 태그(카테고리별 고유 색), 제목, 본문에서 자동 추출한 요약,
+  발행일 · 고정 작성자("CaffeineNote Team") · 조회수
+- 페이지네이션 (5개씩)
+- 썸네일은 실제 이미지가 없으므로 카테고리색 아이콘 플레이스홀더로 대체
+
+### 블로그 상세 (`/blog/[slug]`)
 - 2단 레이아웃: 본문 + sticky sidebar(검색/계산기 링크/광고 영역/인기글), `position: sticky; top: 80px`
 - 건강 정보 글은 상단에 "일반 정보이며 의학적 조언이 아님" 고지 박스 고정 배치
+- 상세 페이지 진입 시 `increment_blog_view` RPC로 조회수 1 증가
 
 ---
 
@@ -224,7 +266,8 @@ create table blog_posts (
   알러지 정보, **source_url·checked_at은 필수 입력 필드**(빈 값으로 저장 불가하게 검증)
 - `/admin/drinks` 목록 화면에는 `checked_at`이 오래된(예: 6개월 이상) 항목을 상단에 강조 표시해서
   데이터 최신화를 유도
-- `/admin/blog`: 제목, slug, 본문(**리치텍스트 에디터, Tiptap 사용**), 발행 상태(초안/발행), 발행일.
+- `/admin/blog`: 제목, slug, 카테고리(카페인/수면/건강/라이프스타일/리뷰/가이드 중 선택),
+  본문(**리치텍스트 에디터, Tiptap 사용**), 발행 상태(초안/발행), 발행일.
   본문 저장 포맷은 Tiptap의 JSON 또는 HTML로 DB(`blog_posts.content`)에 저장하고, 상세 페이지에서
   그대로 렌더링한다. 광고 영역·계산기 링크·인기글은 본문에 끼워넣지 않고, 8장 "블로그" 요구사항대로
   **레이아웃(sticky sidebar) 레벨에서 고정 배치**한다.
