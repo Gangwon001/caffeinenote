@@ -5,6 +5,7 @@ import DrinkFilterForm from "@/components/drinks/DrinkFilterForm";
 interface Filters {
   q?: string;
   brand?: string;
+  size?: string;
   caffeine_min?: string;
   caffeine_max?: string;
   sugar_min?: string;
@@ -37,6 +38,7 @@ export default async function DrinksPage({
       if (!matches) return false;
     }
     if (filters.brand && drink.brands?.slug !== filters.brand) return false;
+    if (filters.size && drink.size !== filters.size) return false;
     if (filters.caffeine_min && (nutrition?.caffeine_mg ?? 0) < Number(filters.caffeine_min))
       return false;
     if (
@@ -55,6 +57,9 @@ export default async function DrinksPage({
   });
 
   const suggestions = Array.from(new Set((drinks ?? []).map((d) => d.name_ko)));
+  const sizes = Array.from(
+    new Set((drinks ?? []).map((d) => d.size).filter((size): size is string => Boolean(size))),
+  );
 
   return (
     <main className="flex-1 p-8 flex flex-col gap-6">
@@ -62,6 +67,7 @@ export default async function DrinksPage({
 
       <DrinkFilterForm
         brands={brands ?? []}
+        sizes={sizes}
         suggestions={suggestions}
         defaults={filters}
       />

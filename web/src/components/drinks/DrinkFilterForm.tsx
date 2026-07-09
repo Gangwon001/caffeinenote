@@ -24,14 +24,17 @@ function saveRecentSearch(query: string) {
 
 export default function DrinkFilterForm({
   brands,
+  sizes,
   suggestions,
   defaults,
 }: {
   brands: { slug: string; name: string }[];
+  sizes: string[];
   suggestions: string[];
   defaults: {
     q?: string;
     brand?: string;
+    size?: string;
     caffeine_min?: string;
     caffeine_max?: string;
     sugar_min?: string;
@@ -111,6 +114,21 @@ export default function DrinkFilterForm({
             {brands.map((b) => (
               <option key={b.slug} value={b.slug}>
                 {b.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          사이즈
+          <select
+            name="size"
+            defaultValue={defaults.size ?? ""}
+            className="rounded-md border border-brand-soft bg-bg px-3 py-2"
+          >
+            <option value="">전체</option>
+            {sizes.map((size) => (
+              <option key={size} value={size}>
+                {size}
               </option>
             ))}
           </select>

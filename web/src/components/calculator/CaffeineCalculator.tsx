@@ -7,7 +7,7 @@ import {
   totalRemainingAt,
   type CaffeineEntry,
 } from "@/lib/caffeine";
-import { saveTodayLogs } from "@/app/calculator/caffeine/actions";
+import { saveTodayLogs } from "@/app/(public)/calculator/caffeine/actions";
 
 interface DrinkEntry {
   id: string;
