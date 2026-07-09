@@ -2,9 +2,7 @@
 
 import { useEditor, EditorContent, type JSONContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
-import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import { Table } from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
@@ -84,10 +82,10 @@ export default function TiptapEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Underline,
+      StarterKit.configure({
+        link: { openOnClick: false, autolink: true },
+      }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Link.configure({ openOnClick: false, autolink: true }),
       Image,
       Table.configure({ resizable: false }),
       TableRow,
@@ -101,9 +99,15 @@ export default function TiptapEditor({
     content: initialContent ?? EMPTY_DOC,
     immediatelyRender: false,
     onUpdate: ({ editor }) => setJson(editor.getJSON()),
+    // Toolbar active-states below read editor.isActive()/getAttributes()
+    // directly during render. That only stays fresh if this component
+    // re-renders on every transaction (content OR selection change), so we
+    // force one here rather than relying on onUpdate alone (which only
+    // fires for content changes).
+    onSelectionUpdate: ({ editor }) => setJson(editor.getJSON()),
     editorProps: {
       attributes: {
-        class: "prose max-w-none min-h-[300px] rounded-md border px-3 py-2 focus:outline-none",
+        class: "blog-content min-h-[300px] rounded-md border px-3 py-2 focus:outline-none",
       },
       handlePaste: (_view, event) => {
         const text = event.clipboardData?.getData("text/plain");
@@ -166,15 +170,12 @@ export default function TiptapEditor({
     }
   }
 
-  const currentFontFamily = editor.getAttributes("textStyle").fontFamily ?? "";
-  const currentFontSize = editor.getAttributes("textStyle").fontSize ?? "";
-
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-1.5 sticky top-0 bg-bg z-10 py-1">
         <select
           title="글꼴"
-          value={currentFontFamily}
+          value={editor.getAttributes("textStyle").fontFamily ?? ""}
           onChange={(e) => {
             const value = e.target.value;
             if (value) editor.chain().focus().setFontFamily(value).run();
@@ -190,7 +191,7 @@ export default function TiptapEditor({
         </select>
         <select
           title="글자 크기"
-          value={currentFontSize}
+          value={editor.getAttributes("textStyle").fontSize ?? ""}
           onChange={(e) => {
             const value = e.target.value;
             if (value) editor.chain().focus().setFontSize(value).run();

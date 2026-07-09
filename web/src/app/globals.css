@@ -27,12 +27,25 @@ body {
   color: var(--color-ink);
 }
 
-.blog-content h2 {
+.blog-content h1,
+.blog-content h2,
+.blog-content h3 {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.375rem;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
+}
+
+.blog-content h1 {
+  font-size: 1.75rem;
+}
+
+.blog-content h2 {
+  font-size: 1.375rem;
+}
+
+.blog-content h3 {
+  font-size: 1.125rem;
 }
 
 .blog-content p {
@@ -59,7 +72,7 @@ body {
 }
 
 .blog-content blockquote {
-  border-left: 3px solid var(--color-brand-soft);
+  border-left: 3px solid var(--color-ink);
   padding-left: 1rem;
   color: color-mix(in srgb, var(--color-ink) 70%, transparent);
 }
