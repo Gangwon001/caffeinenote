@@ -172,7 +172,7 @@ export default function TiptapEditor({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-1.5 sticky top-0 bg-bg z-10 py-1">
+      <div className="flex flex-wrap gap-1.5 bg-bg py-1">
         <select
           title="글꼴"
           value={editor.getAttributes("textStyle").fontFamily ?? ""}
