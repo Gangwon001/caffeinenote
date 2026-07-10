@@ -117,14 +117,14 @@ export async function changePassword(formData: FormData) {
   });
 
   if (verifyError) {
-    redirect(`/dashboard?pwError=${encodeURIComponent("현재 비밀번호가 일치하지 않아요.")}`);
+    redirect(`/account?pwError=${encodeURIComponent("현재 비밀번호가 일치하지 않아요.")}`);
   }
 
   const { error } = await supabase.auth.updateUser({ password: newPassword });
 
   if (error) {
-    redirect(`/dashboard?pwError=${encodeURIComponent(error.message)}`);
+    redirect(`/account?pwError=${encodeURIComponent(error.message)}`);
   }
 
-  redirect(`/dashboard?pwMessage=${encodeURIComponent("비밀번호가 변경되었어요.")}`);
+  redirect(`/account?pwMessage=${encodeURIComponent("비밀번호가 변경되었어요.")}`);
 }

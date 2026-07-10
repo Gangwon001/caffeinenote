@@ -21,5 +21,5 @@ export async function updateSettings(formData: FormData) {
     sensitivity,
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/account");
 }

@@ -63,6 +63,11 @@ export default async function SiteHeader() {
               {link.label}
             </Link>
           ))}
+          {user && (
+            <Link href="/account" className="hover:text-brand">
+              계정 설정
+            </Link>
+          )}
           {isAdmin && (
             <Link href="/admin" className="text-brand hover:underline">
               관리자
