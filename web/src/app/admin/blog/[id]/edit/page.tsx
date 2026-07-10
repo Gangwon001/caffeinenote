@@ -75,22 +75,28 @@ export default async function EditBlogPostPage({
             className="rounded-md border px-3 py-2"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
-          커버 이미지
+        {/*
+          Plain div, not <label>: wrapping a multi-control widget in <label>
+          makes the browser redirect any click inside it (even on the
+          contenteditable body) to the label's first labelable descendant,
+          stealing focus away from whatever was actually clicked.
+        */}
+        <div className="flex flex-col gap-1 text-sm">
+          <span>커버 이미지</span>
           <CoverImageInput
             name="cover_image_url"
             defaultValue={post.cover_image_url}
             folderId={post.id}
           />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          본문
+        </div>
+        <div className="flex flex-col gap-1 text-sm">
+          <span>본문</span>
           <TiptapEditor
             name="content"
             initialContent={post.content as JSONContent}
             folderId={post.id}
           />
-        </label>
+        </div>
         <div className="flex gap-3">
           <button
             type="submit"

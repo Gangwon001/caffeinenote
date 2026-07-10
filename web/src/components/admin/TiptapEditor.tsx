@@ -73,6 +73,7 @@ export default function TiptapEditor({
 }) {
   const [json, setJson] = useState<JSONContent>(initialContent ?? EMPTY_DOC);
   const [draftId] = useState(() => folderId ?? crypto.randomUUID());
+  const [openFontMenu, setOpenFontMenu] = useState<null | "family" | "size">(null);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkValue, setLinkValue] = useState("");
   const [sourceMode, setSourceMode] = useState(false);
@@ -99,11 +100,10 @@ export default function TiptapEditor({
     content: initialContent ?? EMPTY_DOC,
     immediatelyRender: false,
     onUpdate: ({ editor }) => setJson(editor.getJSON()),
-    // Toolbar active-states below read editor.isActive()/getAttributes()
-    // directly during render. That only stays fresh if this component
-    // re-renders on every transaction (content OR selection change), so we
-    // force one here rather than relying on onUpdate alone (which only
-    // fires for content changes).
+    // Forces a re-render on every selection change too (not just content
+    // changes) so toolbar button active-states stay in sync as the cursor
+    // moves. The font selects below are deliberately uncontrolled (see
+    // comment there) so this doesn't cause them to steal focus.
     onSelectionUpdate: ({ editor }) => setJson(editor.getJSON()),
     editorProps: {
       attributes: {
@@ -173,38 +173,29 @@ export default function TiptapEditor({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-1.5 bg-bg py-1">
-        <select
+        {/*
+          A <select> here (even uncontrolled) reliably steals focus from the
+          editor the moment it's clicked into: on click, the browser hands
+          focus back to a <select> that appears earlier in the form instead
+          of the contenteditable body, so the user can never place a cursor.
+          Plain <button>s don't trigger this, so font pickers use a
+          button + dropdown-panel pattern instead (same as the link input
+          below) rather than a native <select>.
+        */}
+        <ToolbarButton
           title="글꼴"
-          value={editor.getAttributes("textStyle").fontFamily ?? ""}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value) editor.chain().focus().setFontFamily(value).run();
-            else editor.chain().focus().unsetFontFamily().run();
-          }}
-          className="rounded border px-1.5 py-1 text-sm bg-bg"
+          active={openFontMenu === "family"}
+          onClick={() => setOpenFontMenu((m) => (m === "family" ? null : "family"))}
         >
-          {FONT_FAMILIES.map((f) => (
-            <option key={f.label} value={f.value}>
-              {f.label}
-            </option>
-          ))}
-        </select>
-        <select
+          글꼴
+        </ToolbarButton>
+        <ToolbarButton
           title="글자 크기"
-          value={editor.getAttributes("textStyle").fontSize ?? ""}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value) editor.chain().focus().setFontSize(value).run();
-            else editor.chain().focus().unsetFontSize().run();
-          }}
-          className="rounded border px-1.5 py-1 text-sm bg-bg"
+          active={openFontMenu === "size"}
+          onClick={() => setOpenFontMenu((m) => (m === "size" ? null : "size"))}
         >
-          {FONT_SIZES.map((f) => (
-            <option key={f.label} value={f.value}>
-              {f.label}
-            </option>
-          ))}
-        </select>
+          크기
+        </ToolbarButton>
 
         <ToolbarButton
           title="굵게"
@@ -337,6 +328,45 @@ export default function TiptapEditor({
           HTML
         </ToolbarButton>
       </div>
+
+      {openFontMenu === "family" && (
+        <div className="flex flex-wrap gap-1.5 bg-brand-soft/30 rounded-md p-2">
+          {FONT_FAMILIES.map((f) => (
+            <button
+              key={f.label}
+              type="button"
+              onClick={() => {
+                if (f.value) editor.chain().focus().setFontFamily(f.value).run();
+                else editor.chain().focus().unsetFontFamily().run();
+                setOpenFontMenu(null);
+              }}
+              className="px-2 py-1 rounded border text-sm hover:bg-brand-soft"
+              style={f.value ? { fontFamily: f.value } : undefined}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {openFontMenu === "size" && (
+        <div className="flex flex-wrap gap-1.5 bg-brand-soft/30 rounded-md p-2">
+          {FONT_SIZES.map((f) => (
+            <button
+              key={f.label}
+              type="button"
+              onClick={() => {
+                if (f.value) editor.chain().focus().setFontSize(f.value).run();
+                else editor.chain().focus().unsetFontSize().run();
+                setOpenFontMenu(null);
+              }}
+              className="px-2 py-1 rounded border text-sm hover:bg-brand-soft"
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {showLinkInput && (
         <div className="flex gap-2 items-center bg-brand-soft/30 rounded-md p-2">
