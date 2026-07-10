@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/require-user";
 import { createClient } from "@/lib/supabase/server";
 import { totalRemainingAt } from "@/lib/caffeine";
+import { changePassword } from "@/lib/auth-actions";
 import Gauge from "@/components/dashboard/Gauge";
 import { updateSettings } from "./actions";
 
@@ -8,7 +9,12 @@ function formatTime(date: Date): string {
   return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ pwError?: string; pwMessage?: string }>;
+}) {
+  const { pwError, pwMessage } = await searchParams;
   const user = await requireUser();
   const supabase = await createClient();
 
@@ -110,6 +116,39 @@ export default async function DashboardPage() {
             className="rounded-md bg-brand text-bg px-4 py-2 font-medium hover:opacity-90"
           >
             저장
+          </button>
+        </form>
+      </section>
+
+      <section>
+        <h2 className="font-display text-lg font-bold mb-3">비밀번호 변경</h2>
+        {pwMessage && <p className="text-sm text-brand mb-2">{pwMessage}</p>}
+        {pwError && <p className="text-sm text-danger mb-2">{pwError}</p>}
+        <form action={changePassword} className="flex flex-wrap gap-4 items-end">
+          <label className="flex flex-col gap-1 text-sm">
+            현재 비밀번호
+            <input
+              type="password"
+              name="currentPassword"
+              required
+              className="rounded-md border border-ink/10 bg-bg px-3 py-2"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            새 비밀번호
+            <input
+              type="password"
+              name="newPassword"
+              required
+              minLength={6}
+              className="rounded-md border border-ink/10 bg-bg px-3 py-2"
+            />
+          </label>
+          <button
+            type="submit"
+            className="rounded-md bg-brand text-bg px-4 py-2 font-medium hover:opacity-90"
+          >
+            변경
           </button>
         </form>
       </section>

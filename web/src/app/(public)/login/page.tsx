@@ -47,6 +47,11 @@ export default async function LoginPage({
           로그인
         </button>
 
+        <p className="text-sm text-ink/70 flex gap-3">
+          <Link href="/find-account" className="text-brand underline">아이디 찾기</Link>
+          <Link href="/forgot-password" className="text-brand underline">비밀번호 찾기</Link>
+        </p>
+
         <p className="text-sm text-ink/70">
           계정이 없으신가요? <Link href="/signup" className="text-brand underline">회원가입</Link>
         </p>
