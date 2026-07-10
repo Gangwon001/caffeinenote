@@ -62,7 +62,7 @@ export default async function HomePage() {
   const [{ data: posts }, { data: brands }, { data: drinks }] = await Promise.all([
     supabase
       .from("blog_posts")
-      .select("id, title, slug, published_at")
+      .select("id, title, slug, published_at, cover_image_url")
       .eq("status", "published")
       .order("published_at", { ascending: false })
       .limit(4),
@@ -216,9 +216,18 @@ export default async function HomePage() {
                 href={`/blog/${post.slug}`}
                 className="rounded-lg border border-ink/10 overflow-hidden hover:shadow-sm transition-shadow"
               >
-                <div className="h-24 bg-brand-soft flex items-center justify-center text-brand/60">
-                  <BookIcon className="w-8 h-8" />
-                </div>
+                {post.cover_image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={post.cover_image_url}
+                    alt=""
+                    className="h-24 w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-24 bg-brand-soft flex items-center justify-center text-brand/60">
+                    <BookIcon className="w-8 h-8" />
+                  </div>
+                )}
                 <div className="p-3">
                   <p className="text-sm font-medium line-clamp-2">{post.title}</p>
                   <p className="text-xs text-ink/50 mt-2">{formatDate(post.published_at)}</p>
