@@ -8,7 +8,6 @@ type Drink = Database["public"]["Tables"]["drinks"]["Row"] & {
 
 export default function DrinkCard({ drink }: { drink: Drink }) {
   const nutrition = drink.drink_nutrition?.[0];
-  const brandSlug = drink.brands?.slug;
 
   const card = (
     <div className="rounded-xl border border-ink/10 bg-brand-soft/10 p-4 hover:shadow-sm transition-shadow h-full">
@@ -37,7 +36,17 @@ export default function DrinkCard({ drink }: { drink: Drink }) {
     </div>
   );
 
-  if (!brandSlug) return card;
+  // Links straight into the calculator (pre-filled + auto-calculated) rather
+  // than the /drinks/[brand]/[slug] detail page, per the "browse → calculate"
+  // flow — clicking a menu should let you immediately see residual caffeine.
+  const displayName = [drink.name_ko, drink.size, drink.temperature?.toUpperCase()]
+    .filter(Boolean)
+    .join(" ");
+  const params = new URLSearchParams({
+    drinkId: drink.id,
+    name: displayName,
+    caffeine: String(nutrition?.caffeine_mg ?? 0),
+  });
 
-  return <Link href={`/drinks/${brandSlug}/${drink.slug}`}>{card}</Link>;
+  return <Link href={`/calculator/caffeine?${params.toString()}`}>{card}</Link>;
 }

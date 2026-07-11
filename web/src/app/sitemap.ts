@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const [{ data: brands }, { data: drinks }, { data: posts }] = await Promise.all([
     supabase.from("brands").select("slug"),
-    supabase.from("drinks").select("slug, brands(slug)"),
+    supabase.from("drinks").select("slug, size, temperature, brands(slug)"),
     supabase.from("blog_posts").select("slug").eq("status", "published"),
   ]);
 
@@ -30,11 +30,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const drinkRoutes: MetadataRoute.Sitemap = (drinks ?? [])
     .filter((drink) => drink.brands?.slug)
-    .map((drink) => ({
-      url: `${baseUrl}/drinks/${drink.brands!.slug}/${drink.slug}`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }));
+    .map((drink) => {
+      // size/temperature disambiguate rows that share the same (brand, slug) —
+      // see the detail page's getDrinkDetail for why this is required.
+      const query = new URLSearchParams({
+        size: drink.size ?? "",
+        temperature: drink.temperature ?? "",
+      });
+      return {
+        url: `${baseUrl}/drinks/${drink.brands!.slug}/${drink.slug}?${query.toString()}`,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      };
+    });
 
   const postRoutes: MetadataRoute.Sitemap = (posts ?? []).map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,

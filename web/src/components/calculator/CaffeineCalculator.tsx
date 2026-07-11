@@ -27,12 +27,20 @@ function formatTime(date: Date): string {
   return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 }
 
+interface InitialDrink {
+  drinkId?: string;
+  name: string;
+  caffeineMg: number;
+}
+
 export default function CaffeineCalculator({
   isLoggedIn,
   catalogDrinks,
+  initialDrink,
 }: {
   isLoggedIn: boolean;
   catalogDrinks: CatalogDrink[];
+  initialDrink?: InitialDrink | null;
 }) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -40,7 +48,22 @@ export default function CaffeineCalculator({
     return () => clearInterval(id);
   }, []);
 
-  const [entries, setEntries] = useState<DrinkEntry[]>([]);
+  // Pre-fill from a "browse → calculate" link (e.g. clicking a drink card on
+  // /drinks) so the residual-caffeine result renders immediately, without the
+  // user having to re-enter the drink and click "음료 추가".
+  const [entries, setEntries] = useState<DrinkEntry[]>(() =>
+    initialDrink
+      ? [
+          {
+            id: crypto.randomUUID(),
+            name: initialDrink.name,
+            caffeineMg: initialDrink.caffeineMg,
+            consumedAt: toDatetimeLocalValue(new Date()),
+            drinkId: initialDrink.drinkId,
+          },
+        ]
+      : [],
+  );
   const [bedtime, setBedtime] = useState("23:00");
 
   const [draftName, setDraftName] = useState("");

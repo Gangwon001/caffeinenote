@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import DrinkCard from "@/components/drinks/DrinkCard";
+import DrinkResults from "@/components/drinks/DrinkResults";
 import DrinkFilterForm from "@/components/drinks/DrinkFilterForm";
 
 interface Filters {
@@ -72,14 +72,7 @@ export default async function DrinksPage({
         defaults={filters}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {results.map((drink) => (
-          <DrinkCard key={drink.id} drink={drink} />
-        ))}
-        {results.length === 0 && (
-          <p className="text-ink/60">검색 결과가 없습니다.</p>
-        )}
-      </div>
+      <DrinkResults results={results} />
     </main>
   );
 }

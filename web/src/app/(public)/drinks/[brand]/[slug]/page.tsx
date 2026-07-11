@@ -4,36 +4,51 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
-const getDrinkDetail = cache(async (brandSlug: string, slug: string) => {
-  const supabase = await createClient();
+const getDrinkDetail = cache(
+  async (brandSlug: string, slug: string, size: string | null, temperature: string | null) => {
+    const supabase = await createClient();
 
-  const { data: brand } = await supabase
-    .from("brands")
-    .select("*")
-    .eq("slug", brandSlug)
-    .maybeSingle();
+    const { data: brand } = await supabase
+      .from("brands")
+      .select("*")
+      .eq("slug", brandSlug)
+      .maybeSingle();
 
-  if (!brand) return null;
+    if (!brand) return null;
 
-  const { data: drink } = await supabase
-    .from("drinks")
-    .select("*, drink_nutrition(*)")
-    .eq("brand_id", brand.id)
-    .eq("slug", slug)
-    .maybeSingle();
+    // The same (brand, slug) can have several rows — one per size/temperature
+    // variant — so slug alone doesn't uniquely identify a drink. size/temperature
+    // are passed as query params by every link into this page; without them,
+    // fall back to the first matching variant rather than 404ing outright.
+    let query = supabase
+      .from("drinks")
+      .select("*, drink_nutrition(*)")
+      .eq("brand_id", brand.id)
+      .eq("slug", slug);
+    if (size !== null) query = query.eq("size", size);
+    if (temperature !== null) query = query.eq("temperature", temperature);
 
-  if (!drink) return null;
+    const { data: drinks } = await query.limit(1);
+    const drink = drinks?.[0];
 
-  return { brand, drink };
-});
+    if (!drink) return null;
+
+    return { brand, drink };
+  },
+);
+
+type DetailSearchParams = { size?: string; temperature?: string };
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ brand: string; slug: string }>;
+  searchParams: Promise<DetailSearchParams>;
 }): Promise<Metadata> {
   const { brand: brandSlug, slug } = await params;
-  const result = await getDrinkDetail(brandSlug, slug);
+  const { size, temperature } = await searchParams;
+  const result = await getDrinkDetail(brandSlug, slug, size ?? null, temperature ?? null);
 
   if (!result) return {};
 
@@ -41,7 +56,7 @@ export async function generateMetadata({
   const nutrition = drink.drink_nutrition?.[0];
   const title = `${drink.name_ko}${drink.size ? ` ${drink.size}` : ""} 카페인·칼로리 | ${brand.name}`;
   const description = `${brand.name} ${drink.name_ko}의 카페인 ${nutrition?.caffeine_mg ?? "-"}mg, 칼로리 ${nutrition?.calories_kcal ?? "-"}kcal, 당류 ${nutrition?.sugar_g ?? "-"}g 정보.`;
-  const canonical = `/drinks/${brandSlug}/${slug}`;
+  const canonical = `/drinks/${brandSlug}/${slug}?size=${encodeURIComponent(drink.size ?? "")}&temperature=${encodeURIComponent(drink.temperature ?? "")}`;
 
   return {
     title,
@@ -53,11 +68,14 @@ export async function generateMetadata({
 
 export default async function DrinkDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ brand: string; slug: string }>;
+  searchParams: Promise<DetailSearchParams>;
 }) {
   const { brand: brandSlug, slug } = await params;
-  const result = await getDrinkDetail(brandSlug, slug);
+  const { size, temperature } = await searchParams;
+  const result = await getDrinkDetail(brandSlug, slug, size ?? null, temperature ?? null);
 
   if (!result) {
     notFound();
