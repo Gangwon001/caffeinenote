@@ -9,6 +9,7 @@ import {
 } from "@/lib/caffeine";
 import { saveTodayLogs } from "@/app/(public)/calculator/caffeine/actions";
 import TimeSelect from "@/components/calculator/TimeSelect";
+import CatalogSearch, { type CatalogDrink } from "@/components/calculator/CatalogSearch";
 
 interface DrinkEntry {
   id: string;
@@ -16,12 +17,6 @@ interface DrinkEntry {
   caffeineMg: number;
   consumedAt: string;
   drinkId?: string;
-}
-
-interface CatalogDrink {
-  id: string;
-  name: string;
-  caffeineMg: number;
 }
 
 function formatTime(date: Date): string {
@@ -82,10 +77,14 @@ function EntryRow({
 export default function CaffeineCalculator({
   isLoggedIn,
   catalogDrinks,
+  brands,
+  sizes,
   initialDrink,
 }: {
   isLoggedIn: boolean;
   catalogDrinks: CatalogDrink[];
+  brands: { name: string; slug: string }[];
+  sizes: string[];
   initialDrink?: InitialDrink | null;
 }) {
   const [now, setNow] = useState(() => new Date());
@@ -118,15 +117,19 @@ export default function CaffeineCalculator({
   const [draftDrinkId, setDraftDrinkId] = useState<string | undefined>(undefined);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
-  function handleNameChange(value: string) {
-    setDraftName(value);
-    const match = catalogDrinks.find((d) => d.name === value);
-    if (match) {
-      setDraftCaffeine(String(match.caffeineMg));
-      setDraftDrinkId(match.id);
-    } else {
-      setDraftDrinkId(undefined);
-    }
+  function pickFromCatalog(drink: CatalogDrink) {
+    setEntries((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: [drink.brandName, drink.name, drink.size, drink.temperature?.toUpperCase()]
+          .filter(Boolean)
+          .join(" "),
+        caffeineMg: drink.caffeineMg,
+        consumedAt: toDatetimeLocalValue(new Date()),
+        drinkId: drink.id,
+      },
+    ]);
   }
 
   function addEntry() {
@@ -227,21 +230,20 @@ export default function CaffeineCalculator({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap gap-3 items-end">
+      <CatalogSearch catalogDrinks={catalogDrinks} brands={brands} sizes={sizes} onPick={pickFromCatalog} />
+
+      <div>
+        <h2 className="font-display text-lg font-bold mb-3">직접 입력</h2>
+        <p className="text-sm text-ink/60 mb-3">목록에 없는 음료는 이름과 카페인양을 직접 입력해서 추가할 수 있어요.</p>
+        <div className="flex flex-wrap gap-3 items-end">
         <label className="flex flex-col gap-1 text-sm">
           음료 이름
           <input
             value={draftName}
-            onChange={(e) => handleNameChange(e.target.value)}
+            onChange={(e) => setDraftName(e.target.value)}
             placeholder="아메리카노"
-            list="calculator-drink-catalog"
             className="rounded-md border border-ink/10 bg-bg px-3 py-2 w-40"
           />
-          <datalist id="calculator-drink-catalog">
-            {catalogDrinks.map((d) => (
-              <option key={d.id} value={d.name} />
-            ))}
-          </datalist>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           카페인(mg)
@@ -275,6 +277,7 @@ export default function CaffeineCalculator({
         >
           음료 추가
         </button>
+        </div>
       </div>
 
       {entries.length > 0 && (

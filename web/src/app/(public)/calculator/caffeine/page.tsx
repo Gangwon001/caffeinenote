@@ -12,17 +12,28 @@ export default async function CaffeineCalculatorPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: drinks } = await supabase
-    .from("drinks")
-    .select("id, name_ko, drink_nutrition(caffeine_mg)");
+  const [{ data: drinks }, { data: brands }] = await Promise.all([
+    supabase
+      .from("drinks")
+      .select("id, name_ko, size, temperature, brands(name, slug), drink_nutrition(caffeine_mg)"),
+    supabase.from("brands").select("name, slug").order("name"),
+  ]);
 
   const catalogDrinks = (drinks ?? [])
     .map((d) => ({
       id: d.id,
       name: d.name_ko,
       caffeineMg: d.drink_nutrition?.[0]?.caffeine_mg ?? 0,
+      brandName: d.brands?.name ?? "",
+      brandSlug: d.brands?.slug ?? "",
+      size: d.size,
+      temperature: d.temperature,
     }))
     .filter((d) => d.caffeineMg > 0);
+
+  const sizes = Array.from(
+    new Set(catalogDrinks.map((d) => d.size).filter((size): size is string => Boolean(size))),
+  );
 
   const initialDrink =
     name && caffeine ? { drinkId, name, caffeineMg: Number(caffeine) } : null;
@@ -36,6 +47,8 @@ export default async function CaffeineCalculatorPage({
       <CaffeineCalculator
         isLoggedIn={Boolean(user)}
         catalogDrinks={catalogDrinks}
+        brands={brands ?? []}
+        sizes={sizes}
         initialDrink={initialDrink}
       />
     </main>
