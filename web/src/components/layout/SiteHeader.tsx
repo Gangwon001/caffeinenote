@@ -5,7 +5,7 @@ import { CupIcon } from "@/components/icons";
 
 const NAV_LINKS = [
   { href: "/drinks", label: "음료 검색" },
-  { href: "/calculator/caffeine", label: "수면 계산" },
+  { href: "/calculator/caffeine", label: "카페인 계산기" },
   { href: "/blog", label: "블로그" },
   { href: "/dashboard", label: "내 기록" },
 ];

@@ -8,6 +8,7 @@ import {
   type CaffeineEntry,
 } from "@/lib/caffeine";
 import { saveTodayLogs } from "@/app/(public)/calculator/caffeine/actions";
+import TimeSelect from "@/components/calculator/TimeSelect";
 
 interface DrinkEntry {
   id: string;
@@ -31,6 +32,51 @@ interface InitialDrink {
   drinkId?: string;
   name: string;
   caffeineMg: number;
+}
+
+function EntryRow({
+  entry,
+  onUpdateTime,
+  onRemove,
+}: {
+  entry: DrinkEntry;
+  onUpdateTime: (id: string, consumedAt: string) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [committedDate, committedTime] = entry.consumedAt.split("T");
+  const [draftDate, setDraftDate] = useState(committedDate);
+  const [draftTime, setDraftTime] = useState(committedTime);
+
+  const dirty = draftDate !== committedDate || draftTime !== committedTime;
+
+  return (
+    <li className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink/15 px-3 py-2 text-sm">
+      <span>
+        {entry.name} · {entry.caffeineMg}mg
+      </span>
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="date"
+          value={draftDate}
+          onChange={(e) => setDraftDate(e.target.value)}
+          className="rounded-md border border-ink/10 bg-bg px-2 py-1 text-sm"
+        />
+        <TimeSelect value={draftTime} onChange={setDraftTime} />
+        {dirty && (
+          <button
+            type="button"
+            onClick={() => onUpdateTime(entry.id, `${draftDate}T${draftTime}`)}
+            className="rounded-md bg-brand text-bg px-3 py-1 text-sm font-medium hover:opacity-90"
+          >
+            계산하기
+          </button>
+        )}
+        <button type="button" onClick={() => onRemove(entry.id)} className="text-danger underline">
+          삭제
+        </button>
+      </div>
+    </li>
+  );
 }
 
 export default function CaffeineCalculator({
@@ -104,6 +150,10 @@ export default function CaffeineCalculator({
 
   function removeEntry(id: string) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  function updateEntryTime(id: string, consumedAt: string) {
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, consumedAt } : e)));
   }
 
   async function handleSave() {
@@ -205,12 +255,18 @@ export default function CaffeineCalculator({
         </label>
         <label className="flex flex-col gap-1 text-sm">
           섭취 시각
-          <input
-            type="datetime-local"
-            value={draftConsumedAt}
-            onChange={(e) => setDraftConsumedAt(e.target.value)}
-            className="rounded-md border border-ink/10 bg-bg px-3 py-2"
-          />
+          <div className="flex gap-1">
+            <input
+              type="date"
+              value={draftConsumedAt.split("T")[0]}
+              onChange={(e) => setDraftConsumedAt(`${e.target.value}T${draftConsumedAt.split("T")[1]}`)}
+              className="rounded-md border border-ink/10 bg-bg px-2 py-2"
+            />
+            <TimeSelect
+              value={draftConsumedAt.split("T")[1]}
+              onChange={(time) => setDraftConsumedAt(`${draftConsumedAt.split("T")[0]}T${time}`)}
+            />
+          </div>
         </label>
         <button
           type="button"
@@ -224,34 +280,19 @@ export default function CaffeineCalculator({
       {entries.length > 0 && (
         <ul className="flex flex-col gap-2">
           {entries.map((entry) => (
-            <li
+            <EntryRow
               key={entry.id}
-              className="flex items-center justify-between rounded-md border border-ink/15 px-3 py-2 text-sm"
-            >
-              <span>
-                {entry.name} · {entry.caffeineMg}mg ·{" "}
-                {formatTime(new Date(entry.consumedAt))}
-              </span>
-              <button
-                type="button"
-                onClick={() => removeEntry(entry.id)}
-                className="text-danger underline"
-              >
-                삭제
-              </button>
-            </li>
+              entry={entry}
+              onUpdateTime={updateEntryTime}
+              onRemove={removeEntry}
+            />
           ))}
         </ul>
       )}
 
-      <label className="flex flex-col gap-1 text-sm max-w-[160px]">
+      <label className="flex flex-col gap-1 text-sm w-fit">
         취침 예정 시각
-        <input
-          type="time"
-          value={bedtime}
-          onChange={(e) => setBedtime(e.target.value)}
-          className="rounded-md border border-ink/10 bg-bg px-3 py-2"
-        />
+        <TimeSelect value={bedtime} onChange={setBedtime} />
       </label>
 
       {entries.length === 0 ? (

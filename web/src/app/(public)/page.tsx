@@ -23,7 +23,7 @@ const FEATURE_CARDS = [
   },
   {
     href: "/calculator/caffeine",
-    title: "수면 계산",
+    title: "카페인 계산기",
     description: "취침 시간을 기준으로 잔존 카페인을 계산하고, 수면에 미치는 영향을 확인해보세요.",
     Icon: MoonIcon,
     iconBg: "#EDE9FB",
