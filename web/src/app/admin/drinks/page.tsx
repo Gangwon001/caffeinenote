@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { createDrink, deleteDrink } from "./actions";
 
 const STALE_MS = 1000 * 60 * 60 * 24 * 30 * 6; // ~6 months
@@ -12,12 +13,16 @@ export default async function AdminDrinksPage({
   const { error } = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: brands }, { data: drinks }] = await Promise.all([
+  const [{ data: brands }, drinks] = await Promise.all([
     supabase.from("brands").select("id, name").order("name"),
-    supabase
-      .from("drinks")
-      .select("*, brands(name), drink_nutrition(*)")
-      .order("checked_at", { foreignTable: "drink_nutrition", ascending: true }),
+    fetchAllRows((from, to) =>
+      supabase
+        .from("drinks")
+        .select("*, brands(name), drink_nutrition(*)")
+        .order("checked_at", { foreignTable: "drink_nutrition", ascending: true })
+        .order("id")
+        .range(from, to),
+    ),
   ]);
 
   // Server Component: evaluated once per request, not subject to render purity concerns.
@@ -112,7 +117,7 @@ export default async function AdminDrinksPage({
           </tr>
         </thead>
         <tbody>
-          {drinks?.map((drink) => {
+          {drinks.map((drink) => {
             const nutrition = drink.drink_nutrition?.[0];
             const isStale =
               nutrition?.checked_at &&

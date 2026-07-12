@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import CaffeineCalculator from "@/components/calculator/CaffeineCalculator";
 
 export default async function CaffeineCalculatorPage({
@@ -12,14 +13,18 @@ export default async function CaffeineCalculatorPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: drinks }, { data: brands }] = await Promise.all([
-    supabase
-      .from("drinks")
-      .select("id, name_ko, size, temperature, brands(name, slug), drink_nutrition(caffeine_mg)"),
+  const [drinks, { data: brands }] = await Promise.all([
+    fetchAllRows((from, to) =>
+      supabase
+        .from("drinks")
+        .select("id, name_ko, size, temperature, brands(name, slug), drink_nutrition(caffeine_mg)")
+        .order("id")
+        .range(from, to),
+    ),
     supabase.from("brands").select("name, slug").order("name"),
   ]);
 
-  const catalogDrinks = (drinks ?? [])
+  const catalogDrinks = drinks
     .map((d) => ({
       id: d.id,
       name: d.name_ko,

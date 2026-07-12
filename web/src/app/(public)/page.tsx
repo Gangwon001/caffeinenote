@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import HeroIllustration from "@/components/home/HeroIllustration";
 import HomeSearchForm from "@/components/home/HomeSearchForm";
 import {
@@ -59,7 +60,7 @@ function formatDate(value: string | null): string {
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [{ data: posts }, { data: brands }, { data: drinks }] = await Promise.all([
+  const [{ data: posts }, { data: brands }, drinks] = await Promise.all([
     supabase
       .from("blog_posts")
       .select("id, title, slug, published_at, cover_image_url")
@@ -67,13 +68,15 @@ export default async function HomePage() {
       .order("published_at", { ascending: false })
       .limit(4),
     supabase.from("brands").select("name, slug").order("name"),
-    supabase.from("drinks").select("size, brands(slug)"),
+    fetchAllRows((from, to) =>
+      supabase.from("drinks").select("size, brands(slug)").order("id").range(from, to),
+    ),
   ]);
 
   // One row per (brand, size) so the search form can narrow the size
   // dropdown to only sizes that exist for the selected brand.
   const brandSizesMap = new Map<string, { brandSlug: string; size: string }>();
-  for (const d of drinks ?? []) {
+  for (const d of drinks) {
     if (d.size && d.brands?.slug) {
       brandSizesMap.set(`${d.brands.slug} ${d.size}`, { brandSlug: d.brands.slug, size: d.size });
     }

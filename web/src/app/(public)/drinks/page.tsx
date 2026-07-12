@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import DrinkResults from "@/components/drinks/DrinkResults";
 import DrinkFilterForm from "@/components/drinks/DrinkFilterForm";
 
@@ -22,12 +23,18 @@ export default async function DrinksPage({
   const filters = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: brands }, { data: drinks }] = await Promise.all([
+  const [{ data: brands }, drinks] = await Promise.all([
     supabase.from("brands").select("name, slug").order("name"),
-    supabase.from("drinks").select("*, brands(name, slug), drink_nutrition(*)"),
+    fetchAllRows((from, to) =>
+      supabase
+        .from("drinks")
+        .select("*, brands(name, slug), drink_nutrition(*)")
+        .order("id")
+        .range(from, to),
+    ),
   ]);
 
-  const results = (drinks ?? []).filter((drink) => {
+  const results = drinks.filter((drink) => {
     const nutrition = drink.drink_nutrition?.[0];
 
     if (filters.q) {
@@ -56,12 +63,12 @@ export default async function DrinksPage({
     return true;
   });
 
-  const suggestions = Array.from(new Set((drinks ?? []).map((d) => d.name_ko)));
+  const suggestions = Array.from(new Set(drinks.map((d) => d.name_ko)));
 
   // One row per (brand, size) so the filter form can narrow the size
   // dropdown to only sizes that exist for the selected brand.
   const brandSizesMap = new Map<string, { brandSlug: string; size: string }>();
-  for (const d of drinks ?? []) {
+  for (const d of drinks) {
     if (d.size && d.brands?.slug) {
       brandSizesMap.set(`${d.brands.slug} ${d.size}`, { brandSlug: d.brands.slug, size: d.size });
     }

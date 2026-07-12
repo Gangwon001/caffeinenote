@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -9,9 +10,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
-  const [{ data: brands }, { data: drinks }, { data: posts }] = await Promise.all([
+  const [{ data: brands }, drinks, { data: posts }] = await Promise.all([
     supabase.from("brands").select("slug"),
-    supabase.from("drinks").select("slug, size, temperature, brands(slug)"),
+    fetchAllRows((from, to) =>
+      supabase
+        .from("drinks")
+        .select("slug, size, temperature, brands(slug)")
+        .order("id")
+        .range(from, to),
+    ),
     supabase.from("blog_posts").select("slug").eq("status", "published"),
   ]);
 
@@ -28,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  const drinkRoutes: MetadataRoute.Sitemap = (drinks ?? [])
+  const drinkRoutes: MetadataRoute.Sitemap = drinks
     .filter((drink) => drink.brands?.slug)
     .map((drink) => {
       // size/temperature disambiguate rows that share the same (brand, slug) —
