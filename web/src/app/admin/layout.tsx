@@ -17,6 +17,7 @@ export default async function AdminLayout({
           <Link href="/admin/brands">브랜드</Link>
           <Link href="/admin/drinks">메뉴</Link>
           <Link href="/admin/blog">블로그</Link>
+          <Link href="/admin/members">회원</Link>
         </nav>
         <form action={logout}>
           <button type="submit" className="text-sm text-ink/60 hover:text-ink">
