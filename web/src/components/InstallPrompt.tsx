@@ -75,7 +75,7 @@ export default function InstallPrompt() {
               onClick={install}
               className="rounded-md bg-brand text-bg px-3 py-1.5 text-sm font-medium hover:opacity-90"
             >
-              앱으로 설치하기
+              홈 화면에 추가하기
             </button>
           </>
         )}
