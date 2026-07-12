@@ -1,4 +1,5 @@
 import SiteHeader from "@/components/layout/SiteHeader";
+import SiteFooter from "@/components/layout/SiteFooter";
 
 export default function PublicLayout({
   children,
@@ -9,6 +10,7 @@ export default function PublicLayout({
     <>
       <SiteHeader />
       {children}
+      <SiteFooter />
     </>
   );
 }
