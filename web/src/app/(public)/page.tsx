@@ -166,10 +166,10 @@ export default async function HomePage() {
                   <img
                     src={post.cover_image_url}
                     alt=""
-                    className="h-24 w-full object-cover"
+                    className="aspect-[3/2] w-full object-cover"
                   />
                 ) : (
-                  <div className="h-24 bg-brand-soft flex items-center justify-center text-brand/60">
+                  <div className="aspect-[3/2] bg-brand-soft flex items-center justify-center text-brand/60">
                     <BookIcon className="w-8 h-8" />
                   </div>
                 )}

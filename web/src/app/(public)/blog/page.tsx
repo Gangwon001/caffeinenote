@@ -91,11 +91,11 @@ export default async function BlogListPage({
                       <img
                         src={post.cover_image_url}
                         alt=""
-                        className="w-32 sm:w-40 h-24 shrink-0 rounded-md object-cover"
+                        className="w-32 sm:w-40 aspect-[3/2] shrink-0 rounded-md object-cover"
                       />
                     ) : (
                       <div
-                        className="w-32 sm:w-40 h-24 shrink-0 rounded-md flex items-center justify-center"
+                        className="w-32 sm:w-40 aspect-[3/2] shrink-0 rounded-md flex items-center justify-center"
                         style={{
                           backgroundColor: style?.bg ?? "#E8F4EC",
                           color: style?.color ?? "#0F5B3A",
