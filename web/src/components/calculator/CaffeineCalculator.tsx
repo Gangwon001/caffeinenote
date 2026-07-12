@@ -78,13 +78,11 @@ export default function CaffeineCalculator({
   isLoggedIn,
   catalogDrinks,
   brands,
-  sizes,
   initialDrink,
 }: {
   isLoggedIn: boolean;
   catalogDrinks: CatalogDrink[];
   brands: { name: string; slug: string }[];
-  sizes: string[];
   initialDrink?: InitialDrink | null;
 }) {
   const [now, setNow] = useState(() => new Date());
@@ -230,7 +228,7 @@ export default function CaffeineCalculator({
 
   return (
     <div className="flex flex-col gap-6">
-      <CatalogSearch catalogDrinks={catalogDrinks} brands={brands} sizes={sizes} onPick={pickFromCatalog} />
+      <CatalogSearch catalogDrinks={catalogDrinks} brands={brands} onPick={pickFromCatalog} />
 
       <div>
         <h2 className="font-display text-lg font-bold mb-3">직접 입력</h2>

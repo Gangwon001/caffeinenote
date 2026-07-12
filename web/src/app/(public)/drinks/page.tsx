@@ -57,9 +57,16 @@ export default async function DrinksPage({
   });
 
   const suggestions = Array.from(new Set((drinks ?? []).map((d) => d.name_ko)));
-  const sizes = Array.from(
-    new Set((drinks ?? []).map((d) => d.size).filter((size): size is string => Boolean(size))),
-  );
+
+  // One row per (brand, size) so the filter form can narrow the size
+  // dropdown to only sizes that exist for the selected brand.
+  const brandSizesMap = new Map<string, { brandSlug: string; size: string }>();
+  for (const d of drinks ?? []) {
+    if (d.size && d.brands?.slug) {
+      brandSizesMap.set(`${d.brands.slug} ${d.size}`, { brandSlug: d.brands.slug, size: d.size });
+    }
+  }
+  const brandSizes = Array.from(brandSizesMap.values());
 
   return (
     <main className="flex-1 p-8 flex flex-col gap-6">
@@ -67,7 +74,7 @@ export default async function DrinksPage({
 
       <DrinkFilterForm
         brands={brands ?? []}
-        sizes={sizes}
+        brandSizes={brandSizes}
         suggestions={suggestions}
         defaults={filters}
       />

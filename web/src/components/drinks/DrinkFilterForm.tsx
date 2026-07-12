@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 const RECENT_SEARCHES_KEY = "caffeinenote:recent-searches";
 const MAX_RECENT = 5;
@@ -24,12 +24,12 @@ function saveRecentSearch(query: string) {
 
 export default function DrinkFilterForm({
   brands,
-  sizes,
+  brandSizes,
   suggestions,
   defaults,
 }: {
   brands: { slug: string; name: string }[];
-  sizes: string[];
+  brandSizes: { brandSlug: string; size: string }[];
   suggestions: string[];
   defaults: {
     q?: string;
@@ -48,6 +48,23 @@ export default function DrinkFilterForm({
   const [query, setQuery] = useState(defaults.q ?? "");
   const [showDropdown, setShowDropdown] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>(loadRecentSearches);
+  const [brand, setBrand] = useState(defaults.brand ?? "");
+  const [size, setSize] = useState(defaults.size ?? "");
+
+  // Only the sizes that exist for the selected brand — picking a brand
+  // narrows the size dropdown instead of showing every brand's sizes.
+  const availableSizes = useMemo(() => {
+    const set = new Set(
+      brandSizes.filter((bs) => !brand || bs.brandSlug === brand).map((bs) => bs.size),
+    );
+    return [...set];
+  }, [brandSizes, brand]);
+
+  function handleBrandChange(value: string) {
+    setBrand(value);
+    const stillValid = brandSizes.some((bs) => (!value || bs.brandSlug === value) && bs.size === size);
+    if (!stillValid) setSize("");
+  }
 
   const matches = query
     ? suggestions.filter((s) => s.toLowerCase().includes(query.toLowerCase())).slice(0, 5)
@@ -107,7 +124,8 @@ export default function DrinkFilterForm({
           브랜드
           <select
             name="brand"
-            defaultValue={defaults.brand ?? ""}
+            value={brand}
+            onChange={(e) => handleBrandChange(e.target.value)}
             className="rounded-md border border-ink/10 bg-bg px-3 py-2"
           >
             <option value="">전체</option>
@@ -122,13 +140,14 @@ export default function DrinkFilterForm({
           사이즈
           <select
             name="size"
-            defaultValue={defaults.size ?? ""}
+            value={size}
+            onChange={(e) => setSize(e.target.value)}
             className="rounded-md border border-ink/10 bg-bg px-3 py-2"
           >
             <option value="">전체</option>
-            {sizes.map((size) => (
-              <option key={size} value={size}>
-                {size}
+            {availableSizes.map((s) => (
+              <option key={s} value={s}>
+                {s}
               </option>
             ))}
           </select>

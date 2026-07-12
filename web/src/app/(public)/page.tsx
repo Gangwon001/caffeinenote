@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import HeroIllustration from "@/components/home/HeroIllustration";
+import HomeSearchForm from "@/components/home/HomeSearchForm";
 import {
   CupIcon,
   MoonIcon,
   ClipboardIcon,
   BookIcon,
-  SearchIcon,
   ChevronIcon,
 } from "@/components/icons";
 
@@ -67,12 +67,18 @@ export default async function HomePage() {
       .order("published_at", { ascending: false })
       .limit(4),
     supabase.from("brands").select("name, slug").order("name"),
-    supabase.from("drinks").select("size"),
+    supabase.from("drinks").select("size, brands(slug)"),
   ]);
 
-  const sizes = Array.from(
-    new Set((drinks ?? []).map((d) => d.size).filter((size): size is string => Boolean(size))),
-  );
+  // One row per (brand, size) so the search form can narrow the size
+  // dropdown to only sizes that exist for the selected brand.
+  const brandSizesMap = new Map<string, { brandSlug: string; size: string }>();
+  for (const d of drinks ?? []) {
+    if (d.size && d.brands?.slug) {
+      brandSizesMap.set(`${d.brands.slug} ${d.size}`, { brandSlug: d.brands.slug, size: d.size });
+    }
+  }
+  const brandSizes = Array.from(brandSizesMap.values());
 
   return (
     <main className="flex-1">
@@ -90,71 +96,7 @@ export default async function HomePage() {
               취침 전 잔존 카페인을 계산해보세요.
             </p>
 
-            <form
-              action="/drinks"
-              className="w-full flex flex-wrap items-end gap-2 bg-bg border border-ink/10 rounded-xl p-4"
-            >
-              <label className="flex flex-col gap-1.5 text-sm">
-                <span className="flex items-center gap-1.5 text-ink/70">
-                  <CupIcon className="w-4 h-4" /> 브랜드
-                </span>
-                <select
-                  name="brand"
-                  defaultValue=""
-                  className="rounded-md border border-ink/15 bg-bg px-3 py-2 text-sm"
-                >
-                  <option value="">전체 브랜드</option>
-                  {(brands ?? []).map((b) => (
-                    <option key={b.slug} value={b.slug}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <ChevronIcon className="w-4 h-4 text-ink/30 mb-2.5" />
-
-              <label className="flex flex-col gap-1.5 text-sm">
-                <span className="flex items-center gap-1.5 text-ink/70">
-                  <CupIcon className="w-4 h-4" /> 사이즈
-                </span>
-                <select
-                  name="size"
-                  defaultValue=""
-                  className="rounded-md border border-ink/15 bg-bg px-3 py-2 text-sm"
-                >
-                  <option value="">전체 사이즈</option>
-                  {sizes.map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <ChevronIcon className="w-4 h-4 text-ink/30 mb-2.5" />
-
-              <label className="flex-1 min-w-[200px] flex flex-col gap-1.5 text-sm">
-                <span className="flex items-center gap-1.5 text-ink/70">
-                  <MoonIcon className="w-4 h-4" /> 메뉴 검색
-                </span>
-                <div className="flex gap-2">
-                  <input
-                    type="search"
-                    name="q"
-                    placeholder="메뉴명을 입력하세요"
-                    className="flex-1 rounded-md border border-ink/15 bg-bg px-3 py-2 text-sm"
-                  />
-                  <button
-                    type="submit"
-                    aria-label="검색"
-                    className="rounded-md bg-brand text-bg px-4 py-2 hover:opacity-90"
-                  >
-                    <SearchIcon className="w-4 h-4" />
-                  </button>
-                </div>
-              </label>
-            </form>
+            <HomeSearchForm brands={brands ?? []} brandSizes={brandSizes} />
 
             <div className="flex flex-wrap gap-2">
               <span className="text-sm text-ink/50 self-center">인기 검색어:</span>

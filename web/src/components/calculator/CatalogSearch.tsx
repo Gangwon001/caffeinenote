@@ -23,16 +23,26 @@ function formatDrinkName(d: CatalogDrink): string {
 export default function CatalogSearch({
   catalogDrinks,
   brands,
-  sizes,
   onPick,
 }: {
   catalogDrinks: CatalogDrink[];
   brands: { name: string; slug: string }[];
-  sizes: string[];
   onPick: (drink: CatalogDrink) => void;
 }) {
   const [brand, setBrand] = useState("");
   const [size, setSize] = useState("");
+
+  // Only the sizes that actually exist for the selected brand — picking a
+  // brand narrows the size dropdown instead of showing every brand's sizes.
+  const availableSizes = useMemo(() => {
+    const set = new Set(
+      catalogDrinks
+        .filter((d) => !brand || d.brandSlug === brand)
+        .map((d) => d.size)
+        .filter((s): s is string => Boolean(s)),
+    );
+    return [...set];
+  }, [catalogDrinks, brand]);
   const [query, setQuery] = useState("");
   // After picking a result, the search box fills with its name but the
   // results list collapses (rather than re-filtering to just that name) —
@@ -58,6 +68,11 @@ export default function CatalogSearch({
   function handleBrandChange(value: string) {
     setBrand(value);
     setJustPicked(false);
+    // Drop the current size if it doesn't exist for the newly selected brand.
+    const stillValid = catalogDrinks.some(
+      (d) => (!value || d.brandSlug === value) && d.size === size,
+    );
+    if (!stillValid) setSize("");
   }
   function handleSizeChange(value: string) {
     setSize(value);
@@ -106,7 +121,7 @@ export default function CatalogSearch({
             className="rounded-md border border-ink/15 bg-bg px-3 py-2 text-sm"
           >
             <option value="">전체 사이즈</option>
-            {sizes.map((s) => (
+            {availableSizes.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>

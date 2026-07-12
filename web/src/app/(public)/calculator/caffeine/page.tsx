@@ -31,10 +31,6 @@ export default async function CaffeineCalculatorPage({
     }))
     .filter((d) => d.caffeineMg > 0);
 
-  const sizes = Array.from(
-    new Set(catalogDrinks.map((d) => d.size).filter((size): size is string => Boolean(size))),
-  );
-
   const initialDrink =
     name && caffeine ? { drinkId, name, caffeineMg: Number(caffeine) } : null;
 
@@ -48,7 +44,6 @@ export default async function CaffeineCalculatorPage({
         isLoggedIn={Boolean(user)}
         catalogDrinks={catalogDrinks}
         brands={brands ?? []}
-        sizes={sizes}
         initialDrink={initialDrink}
       />
     </main>

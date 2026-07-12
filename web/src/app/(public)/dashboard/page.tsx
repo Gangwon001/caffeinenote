@@ -3,6 +3,8 @@ import { requireUser } from "@/lib/require-user";
 import { createClient } from "@/lib/supabase/server";
 import { totalRemainingAt } from "@/lib/caffeine";
 import Gauge from "@/components/dashboard/Gauge";
+import ResetTodayButton from "@/components/dashboard/ResetTodayButton";
+import { resetTodayLogs } from "./actions";
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
@@ -26,17 +28,21 @@ export default async function DashboardPage() {
 
   const { data: logs } = await supabase
     .from("user_drink_logs")
-    .select("consumed_at, drinks(name_ko, drink_nutrition(caffeine_mg))")
+    .select("id, consumed_at, drinks(name_ko, drink_nutrition(caffeine_mg))")
     .eq("user_id", user.id)
     .gte("consumed_at", startOfToday.toISOString())
     .order("consumed_at", { ascending: true });
 
-  const entries = (logs ?? [])
+  const todayLogs = (logs ?? [])
     .filter((log) => log.consumed_at !== null)
     .map((log) => ({
+      id: log.id,
+      name: log.drinks?.name_ko ?? "삭제된 음료",
       caffeineMg: log.drinks?.drink_nutrition?.[0]?.caffeine_mg ?? 0,
       consumedAt: new Date(log.consumed_at as string),
     }));
+
+  const entries = todayLogs.map(({ caffeineMg, consumedAt }) => ({ caffeineMg, consumedAt }));
 
   const todayIntake = entries.reduce((sum, e) => sum + e.caffeineMg, 0);
   const percentOfLimit = dailyLimit > 0 ? (todayIntake / dailyLimit) * 100 : 0;
@@ -69,6 +75,30 @@ export default async function DashboardPage() {
           취침 예정({formatTime(bedtimeDate)}) 예상 잔존 카페인
         </p>
         <p className="text-2xl font-bold tabular-nums">{remainingAtBedtime.toFixed(0)}mg</p>
+      </section>
+
+      <section className="rounded-xl border border-ink/10 p-6 flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-lg font-bold">오늘 마신 음료</h2>
+          {todayLogs.length > 0 && <ResetTodayButton action={resetTodayLogs} />}
+        </div>
+        {todayLogs.length === 0 ? (
+          <p className="text-sm text-ink/60">오늘 기록된 음료가 없어요.</p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {todayLogs.map((log) => (
+              <li
+                key={log.id}
+                className="flex items-center justify-between text-sm border-b border-ink/10 pb-2 last:border-0 last:pb-0"
+              >
+                <span>{log.name}</span>
+                <span className="text-ink/60 tabular-nums">
+                  {log.caffeineMg}mg · {formatTime(log.consumedAt)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <Link href="/account" className="text-sm text-brand underline w-fit">
