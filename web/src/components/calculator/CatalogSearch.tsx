@@ -13,6 +13,10 @@ export interface CatalogDrink {
   temperature: string | null;
 }
 
+function formatDrinkName(d: CatalogDrink): string {
+  return [d.brandName, d.name, d.size, d.temperature?.toUpperCase()].filter(Boolean).join(" ");
+}
+
 // Mirrors the home page's 브랜드/사이즈/메뉴 검색 search bar, but filters the
 // catalog inline instead of navigating to /drinks — picking a result adds it
 // straight to the calculator.
@@ -30,8 +34,13 @@ export default function CatalogSearch({
   const [brand, setBrand] = useState("");
   const [size, setSize] = useState("");
   const [query, setQuery] = useState("");
+  // After picking a result, the search box fills with its name but the
+  // results list collapses (rather than re-filtering to just that name) —
+  // otherwise it's easy to miss that the drink was actually added below.
+  // Any further edit to brand/size/query re-opens the list.
+  const [justPicked, setJustPicked] = useState(false);
 
-  const active = Boolean(brand || size || query.trim());
+  const active = Boolean(brand || size || query.trim()) && !justPicked;
 
   const results = useMemo(() => {
     if (!active) return [];
@@ -46,6 +55,24 @@ export default function CatalogSearch({
       .slice(0, 30);
   }, [catalogDrinks, brand, size, query, active]);
 
+  function handleBrandChange(value: string) {
+    setBrand(value);
+    setJustPicked(false);
+  }
+  function handleSizeChange(value: string) {
+    setSize(value);
+    setJustPicked(false);
+  }
+  function handleQueryChange(value: string) {
+    setQuery(value);
+    setJustPicked(false);
+  }
+  function handlePick(drink: CatalogDrink) {
+    onPick(drink);
+    setQuery(formatDrinkName(drink));
+    setJustPicked(true);
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <div className="w-full flex flex-wrap items-end gap-2 bg-bg border border-ink/10 rounded-xl p-4">
@@ -55,7 +82,7 @@ export default function CatalogSearch({
           </span>
           <select
             value={brand}
-            onChange={(e) => setBrand(e.target.value)}
+            onChange={(e) => handleBrandChange(e.target.value)}
             className="rounded-md border border-ink/15 bg-bg px-3 py-2 text-sm"
           >
             <option value="">전체 브랜드</option>
@@ -75,7 +102,7 @@ export default function CatalogSearch({
           </span>
           <select
             value={size}
-            onChange={(e) => setSize(e.target.value)}
+            onChange={(e) => handleSizeChange(e.target.value)}
             className="rounded-md border border-ink/15 bg-bg px-3 py-2 text-sm"
           >
             <option value="">전체 사이즈</option>
@@ -97,7 +124,7 @@ export default function CatalogSearch({
             <input
               type="search"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => handleQueryChange(e.target.value)}
               placeholder="메뉴명을 입력하세요"
               className="flex-1 rounded-md border border-ink/15 bg-bg px-3 py-2 text-sm"
             />
@@ -119,7 +146,7 @@ export default function CatalogSearch({
               <li key={d.id}>
                 <button
                   type="button"
-                  onClick={() => onPick(d)}
+                  onClick={() => handlePick(d)}
                   className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left hover:bg-brand-soft/30"
                 >
                   <span>
