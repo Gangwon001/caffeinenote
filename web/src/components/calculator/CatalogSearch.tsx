@@ -14,7 +14,7 @@ export interface CatalogDrink {
 }
 
 function formatDrinkName(d: CatalogDrink): string {
-  return [d.brandName, d.name, d.size, d.temperature?.toUpperCase()].filter(Boolean).join(" ");
+  return [d.name, d.size, d.temperature?.toUpperCase()].filter(Boolean).join(" ");
 }
 
 // Mirrors the home page's 브랜드/사이즈/메뉴 검색 search bar, but filters the
