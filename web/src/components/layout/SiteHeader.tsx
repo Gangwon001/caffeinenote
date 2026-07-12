@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/lib/auth-actions";
 import { CupIcon } from "@/components/icons";
+import InstallMenuButton from "@/components/InstallMenuButton";
 
 const NAV_LINKS = [
   { href: "/drinks", label: "음료 검색" },
@@ -73,6 +74,7 @@ export default async function SiteHeader() {
               관리자
             </Link>
           )}
+          <InstallMenuButton />
         </nav>
 
         <div className="hidden md:block">{authControls}</div>
