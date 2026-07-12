@@ -79,7 +79,7 @@ export default async function BlogPostPage({
             <img
               src={post.cover_image_url}
               alt=""
-              className="w-full max-h-80 object-cover rounded-lg"
+              className="w-full aspect-[3/2] object-cover rounded-lg"
             />
           )}
 
