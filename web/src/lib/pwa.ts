@@ -27,7 +27,7 @@ export function detectIosBrowser(): IosBrowser {
 export function iosAddToHomeScreenTip(browser: IosBrowser): string {
   switch (browser) {
     case "chrome":
-      return "우측 상단 ⋮ 메뉴를 누른 뒤 공유 → 홈 화면에 추가를 선택하세요.";
+      return "주소창 우측 공유 버튼을 누른 뒤 홈 화면에 추가를 선택하세요.";
     case "safari":
       return "하단 공유 버튼을 누른 뒤 홈 화면에 추가를 선택하세요.";
     default:
