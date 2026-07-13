@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { detectInstallPlatform, trackPwaInstallClick } from "@/lib/analytics";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -51,6 +52,11 @@ export default function InstallPrompt() {
 
   async function install() {
     if (!deferredPrompt) return;
+    trackPwaInstallClick({
+      platform: detectInstallPlatform(),
+      install_method: "native_prompt",
+      location: "banner",
+    });
     await deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     setDeferredPrompt(null);

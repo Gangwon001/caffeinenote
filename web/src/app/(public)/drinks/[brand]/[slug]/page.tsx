@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import OutboundLink from "@/components/analytics/OutboundLink";
 
 const getDrinkDetail = cache(
   async (brandSlug: string, slug: string, size: string | null, temperature: string | null) => {
@@ -175,9 +176,14 @@ export default async function DrinkDetailPage({
       {nutrition && (
         <p className="text-xs text-ink/50 border-t pt-3">
           출처:{" "}
-          <a href={nutrition.source_url} target="_blank" rel="noopener noreferrer" className="underline">
+          <OutboundLink
+            href={nutrition.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
             {nutrition.source_url}
-          </a>{" "}
+          </OutboundLink>{" "}
           · 확인일 {nutrition.checked_at}
         </p>
       )}

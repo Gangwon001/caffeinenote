@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import InstallPrompt from "@/components/InstallPrompt";
 import "./globals.css";
@@ -50,6 +51,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  // Only load GA4 in production, and only when a measurement ID is actually
+  // configured — keeps dev/preview traffic out of analytics and avoids
+  // shipping a script tag that has nothing to point at.
+  const gaEnabled = process.env.NODE_ENV === "production" && Boolean(gaId);
+
   return (
     <html
       lang="ko"
@@ -59,6 +66,7 @@ export default function RootLayout({
         {children}
         <ServiceWorkerRegister />
         <InstallPrompt />
+        {gaEnabled && <GoogleAnalytics gaId={gaId!} />}
       </body>
     </html>
   );

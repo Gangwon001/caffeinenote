@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CupIcon, MoonIcon, SearchIcon, ChevronIcon } from "@/components/icons";
+import { trackSelectSearchResult } from "@/lib/analytics";
 
 export interface CatalogDrink {
   id: string;
@@ -86,6 +87,7 @@ export default function CatalogSearch({
     onPick(drink);
     setQuery(formatDrinkName(drink));
     setJustPicked(true);
+    trackSelectSearchResult({ result_id: drink.id, result_name: formatDrinkName(drink) });
   }
 
   return (

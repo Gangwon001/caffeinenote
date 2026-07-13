@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { renderTiptapContent } from "@/lib/tiptap-html";
+import BlogViewTracker from "@/components/analytics/BlogViewTracker";
 
 const getPost = cache(async (slug: string) => {
   const supabase = await createClient();
@@ -65,6 +66,7 @@ export default async function BlogPostPage({
 
   return (
     <main className="flex-1 p-8 max-w-5xl mx-auto">
+      <BlogViewTracker postSlug={post.slug} postTitle={post.title} category={post.category} />
       <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-8 items-start">
         <article className="flex flex-col gap-4 min-w-0">
           <div className="rounded-md bg-brand-soft/30 border border-ink/10 p-4 text-sm text-ink/80">

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import DrinkResults from "@/components/drinks/DrinkResults";
 import DrinkFilterForm from "@/components/drinks/DrinkFilterForm";
+import SearchTracker from "@/components/analytics/SearchTracker";
 
 interface Filters {
   q?: string;
@@ -78,6 +79,8 @@ export default async function DrinksPage({
   return (
     <main className="flex-1 p-8 flex flex-col gap-6">
       <h1 className="font-display text-2xl font-bold">음료 검색</h1>
+
+      {filters.q && <SearchTracker searchTerm={filters.q} resultCount={results.length} />}
 
       <DrinkFilterForm
         brands={brands ?? []}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Database } from "@/types/supabase";
+import { trackSelectSearchResult } from "@/lib/analytics";
 
 type Drink = Database["public"]["Tables"]["drinks"]["Row"] & {
   brands: Pick<Database["public"]["Tables"]["brands"]["Row"], "name" | "slug"> | null;
@@ -48,5 +49,12 @@ export default function DrinkCard({ drink }: { drink: Drink }) {
     caffeine: String(nutrition?.caffeine_mg ?? 0),
   });
 
-  return <Link href={`/calculator/caffeine?${params.toString()}`}>{card}</Link>;
+  return (
+    <Link
+      href={`/calculator/caffeine?${params.toString()}`}
+      onClick={() => trackSelectSearchResult({ result_id: drink.id, result_name: displayName })}
+    >
+      {card}
+    </Link>
+  );
 }

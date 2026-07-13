@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { detectInstallPlatform, trackPwaInstallClick } from "@/lib/analytics";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -39,12 +40,22 @@ export default function InstallMenuButton() {
 
   async function handleClick() {
     if (deferredPrompt) {
+      trackPwaInstallClick({
+        platform: detectInstallPlatform(),
+        install_method: "native_prompt",
+        location: "header_menu",
+      });
       await deferredPrompt.prompt();
       await deferredPrompt.userChoice;
       setDeferredPrompt(null);
       return;
     }
     if (client?.ios) {
+      trackPwaInstallClick({
+        platform: "ios",
+        install_method: "ios_manual_instructions",
+        location: "header_menu",
+      });
       setIosTipOpen((open) => !open);
     }
   }
