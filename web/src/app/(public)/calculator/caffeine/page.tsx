@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import CaffeineCalculator from "@/components/calculator/CaffeineCalculator";
+
+export const metadata: Metadata = {
+  title: "카페인 계산기 | 카페인노트",
+  description: "마신 음료와 취침 예정 시각을 입력하면 잔존 카페인을 계산해드려요.",
+  alternates: { canonical: "/calculator/caffeine" },
+};
 
 export default async function CaffeineCalculatorPage({
   searchParams,

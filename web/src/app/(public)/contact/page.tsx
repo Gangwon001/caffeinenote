@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "문의 | 카페인노트",
   description: "카페인노트에 문의하는 방법을 안내합니다.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

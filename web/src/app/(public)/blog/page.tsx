@@ -1,10 +1,17 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { extractTiptapExcerpt } from "@/lib/tiptap-html";
 import { getCategoryStyle } from "@/lib/blog-categories";
 import { BookIcon, EyeIcon, ChevronIcon } from "@/components/icons";
 import BlogHeroIllustration from "@/components/blog/BlogHeroIllustration";
 import BlogFilterBar from "@/components/blog/BlogFilterBar";
+
+export const metadata: Metadata = {
+  title: "블로그 | 카페인노트",
+  description: "카페인, 수면, 건강에 관한 카페인노트 블로그 글 모음.",
+  alternates: { canonical: "/blog", types: { "application/rss+xml": "/rss.xml" } },
+};
 
 const PAGE_SIZE = 5;
 

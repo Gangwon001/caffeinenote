@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "개인정보처리방침 | 카페인노트",
   description: "카페인노트의 개인정보처리방침을 안내합니다.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

@@ -19,7 +19,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .order("id")
         .range(from, to),
     ),
-    supabase.from("blog_posts").select("slug").eq("status", "published"),
+    supabase
+      .from("blog_posts")
+      .select("slug, published_at, updated_at")
+      .eq("status", "published"),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -51,11 +54,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       };
     });
 
-  const postRoutes: MetadataRoute.Sitemap = (posts ?? []).map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    changeFrequency: "monthly",
-    priority: 0.5,
-  }));
+  const postRoutes: MetadataRoute.Sitemap = (posts ?? []).map((post) => {
+    const lastModified = post.updated_at ?? post.published_at;
+    return {
+      url: `${baseUrl}/blog/${post.slug}`,
+      changeFrequency: "monthly",
+      priority: 0.5,
+      ...(lastModified && { lastModified: new Date(lastModified) }),
+    };
+  });
 
   return [...staticRoutes, ...brandRoutes, ...drinkRoutes, ...postRoutes];
 }

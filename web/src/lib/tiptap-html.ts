@@ -63,7 +63,10 @@ function renderNode(node: TiptapNode): string {
     case "paragraph":
       return `<p${alignStyle(node)}>${children}</p>`;
     case "heading": {
-      const level = Number(node.attrs?.level) || 2;
+      // Clamp to h2+ regardless of what the editor stored — the page's own
+      // <h1> is always the post title, so a second h1 in the body would
+      // break the document outline search engines rely on.
+      const level = Math.max(2, Number(node.attrs?.level) || 2);
       return `<h${level}${alignStyle(node)}>${children}</h${level}>`;
     }
     case "bulletList":
@@ -121,4 +124,41 @@ export function extractTiptapExcerpt(doc: unknown, maxLength = 90): string {
   if (!doc || typeof doc !== "object") return "";
   const text = extractText(doc as TiptapNode).replace(/\s+/g, " ").trim();
   return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
+}
+
+export interface FaqPair {
+  question: string;
+  answer: string;
+}
+
+// Best-effort FAQ extraction for FAQPage JSON-LD: any top-level heading
+// that reads like a question ("...?" or starts with "Q") becomes one FAQ
+// entry, with the non-heading blocks that follow it (up to the next
+// heading) taken as its answer. No dedicated FAQ authoring UI exists, so
+// this works off whatever heading/question style writers already use.
+export function extractFaqPairs(doc: unknown): FaqPair[] {
+  if (!doc || typeof doc !== "object") return [];
+  const nodes = (doc as TiptapNode).content ?? [];
+  const isQuestion = (node: TiptapNode) => {
+    const text = extractText(node).trim();
+    return /[?？]\s*$/.test(text) || /^Q[.:)\s]/i.test(text);
+  };
+
+  const pairs: FaqPair[] = [];
+  let current: FaqPair | null = null;
+
+  for (const node of nodes) {
+    if (node.type === "heading") {
+      if (current && current.answer.trim()) pairs.push(current);
+      current = isQuestion(node) ? { question: extractText(node).trim(), answer: "" } : null;
+      continue;
+    }
+    if (current) {
+      const text = extractText(node).replace(/\s+/g, " ").trim();
+      if (text) current.answer += (current.answer ? " " : "") + text;
+    }
+  }
+  if (current && current.answer.trim()) pairs.push(current);
+
+  return pairs.map((pair) => ({ ...pair, answer: pair.answer.slice(0, 1000) }));
 }

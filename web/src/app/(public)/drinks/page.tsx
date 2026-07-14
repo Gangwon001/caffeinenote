@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import DrinkResults from "@/components/drinks/DrinkResults";
 import DrinkFilterForm from "@/components/drinks/DrinkFilterForm";
 import SearchTracker from "@/components/analytics/SearchTracker";
+
+export const metadata: Metadata = {
+  title: "음료 검색 | 카페인노트",
+  description: "브랜드별 카페 음료의 카페인·칼로리·당류 정보를 검색하고 비교해보세요.",
+  // Fixed regardless of query filters — every ?q=/brand=/size= combination
+  // is the same underlying page, not distinct content worth indexing apart.
+  alternates: { canonical: "/drinks" },
+};
 
 interface Filters {
   q?: string;

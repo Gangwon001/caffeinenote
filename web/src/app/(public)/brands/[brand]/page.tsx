@@ -1,6 +1,37 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import DrinkCard from "@/components/drinks/DrinkCard";
+
+const getBrand = cache(async (brandSlug: string) => {
+  const supabase = await createClient();
+  const { data: brand } = await supabase
+    .from("brands")
+    .select("*")
+    .eq("slug", brandSlug)
+    .maybeSingle();
+  return brand;
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ brand: string }>;
+}): Promise<Metadata> {
+  const { brand: brandSlug } = await params;
+  const brand = await getBrand(brandSlug);
+  if (!brand) return {};
+
+  const canonical = `/brands/${brandSlug}`;
+  const description = `${brand.name}의 전체 메뉴별 카페인·칼로리·당류 정보를 확인해보세요.`;
+  return {
+    title: `${brand.name} 메뉴 카페인 정보 | 카페인노트`,
+    description,
+    alternates: { canonical },
+    openGraph: { title: brand.name, description, url: canonical },
+  };
+}
 
 export default async function BrandPage({
   params,
@@ -8,18 +39,13 @@ export default async function BrandPage({
   params: Promise<{ brand: string }>;
 }) {
   const { brand: brandSlug } = await params;
-  const supabase = await createClient();
-
-  const { data: brand } = await supabase
-    .from("brands")
-    .select("*")
-    .eq("slug", brandSlug)
-    .maybeSingle();
+  const brand = await getBrand(brandSlug);
 
   if (!brand) {
     notFound();
   }
 
+  const supabase = await createClient();
   const { data: drinks } = await supabase
     .from("drinks")
     .select("*, brands(name, slug), drink_nutrition(*)")

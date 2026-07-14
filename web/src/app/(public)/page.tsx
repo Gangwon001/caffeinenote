@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import HeroIllustration from "@/components/home/HeroIllustration";
@@ -10,6 +11,12 @@ import {
   BookIcon,
   ChevronIcon,
 } from "@/components/icons";
+
+export const metadata: Metadata = {
+  // A page-level `alternates` replaces the root layout's entirely rather
+  // than merging with it, so the RSS link has to be repeated here too.
+  alternates: { canonical: "/", types: { "application/rss+xml": "/rss.xml" } },
+};
 
 const POPULAR_QUERIES = ["아메리카노", "라떼", "바닐라 라떼", "녹차", "디카페인", "콜드브루"];
 

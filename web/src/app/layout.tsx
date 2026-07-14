@@ -16,11 +16,17 @@ const notoSerifKR = Noto_Serif_KR({
   subsets: ["latin"],
 });
 
+const SITE_NAME = "카페인노트";
+const SITE_DESCRIPTION =
+  "카페 음료의 카페인·칼로리·당류를 검색하고, 취침 시간 기준 잔존 카페인을 계산해보세요.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: "카페인노트 | CaffeineNote",
-  description:
-    "카페 음료의 카페인·칼로리·당류를 검색하고, 취침 시간 기준 잔존 카페인을 계산해보세요.",
+  // Every page currently sets its own full title string (e.g. "소개 | 카페인노트"),
+  // so this stays a plain default rather than a template to avoid a double
+  // "| 카페인노트 | 카페인노트" suffix on those pages.
+  title: `${SITE_NAME} | CaffeineNote`,
+  description: SITE_DESCRIPTION,
   icons: {
     icon: [
       { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
@@ -34,6 +40,29 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "카페인노트",
   },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} | CaffeineNote`,
+    description: SITE_DESCRIPTION,
+    locale: "ko_KR",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} | CaffeineNote`,
+    description: SITE_DESCRIPTION,
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    types: { "application/rss+xml": "/rss.xml" },
+  },
+  // Naver Search Advisor site-verification meta tag — leave
+  // NAVER_SITE_VERIFICATION unset until you have a real code from
+  // https://searchadvisor.naver.com; the tag simply won't render until then.
+  ...(process.env.NAVER_SITE_VERIFICATION && {
+    verification: { other: { "naver-site-verification": process.env.NAVER_SITE_VERIFICATION } },
+  }),
   other: {
     // Next's `appleWebApp.capable` now emits the modern, non-prefixed
     // `mobile-web-app-capable` tag; older iOS Safari only honors the

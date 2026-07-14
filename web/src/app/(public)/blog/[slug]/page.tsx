@@ -3,8 +3,31 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { renderTiptapContent } from "@/lib/tiptap-html";
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
+import { renderTiptapContent, extractFaqPairs } from "@/lib/tiptap-html";
+import { safeJsonLd } from "@/lib/json-ld";
+import { findMentionedDrinkKeywords } from "@/lib/related-drinks";
 import BlogViewTracker from "@/components/analytics/BlogViewTracker";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+function buildCalculatorHref(drink: {
+  id: string;
+  name_ko: string;
+  size: string | null;
+  temperature: string | null;
+  drink_nutrition: { caffeine_mg: number | null }[];
+}) {
+  const displayName = [drink.name_ko, drink.size, drink.temperature?.toUpperCase()]
+    .filter(Boolean)
+    .join(" ");
+  const params = new URLSearchParams({
+    drinkId: drink.id,
+    name: displayName,
+    caffeine: String(drink.drink_nutrition?.[0]?.caffeine_mg ?? 0),
+  });
+  return `/calculator/caffeine?${params.toString()}`;
+}
 
 const getPost = cache(async (slug: string) => {
   const supabase = await createClient();
@@ -33,9 +56,19 @@ export async function generateMetadata({
     description,
     alternates: { canonical },
     openGraph: {
+      type: "article",
       title: post.title,
       description,
       url: canonical,
+      publishedTime: post.published_at ?? undefined,
+      modifiedTime: post.updated_at ?? undefined,
+      authors: ["CaffeineNote Team"],
+      ...(post.cover_image_url && { images: [post.cover_image_url] }),
+    },
+    twitter: {
+      card: post.cover_image_url ? "summary_large_image" : "summary",
+      title: post.title,
+      description,
       ...(post.cover_image_url && { images: [post.cover_image_url] }),
     },
   };
@@ -56,16 +89,93 @@ export default async function BlogPostPage({
   const supabase = await createClient();
   await supabase.rpc("increment_blog_view", { post_slug: slug });
 
-  const { data: popularPosts } = await supabase
-    .from("blog_posts")
-    .select("id, title, slug")
-    .eq("status", "published")
-    .neq("slug", slug)
-    .order("published_at", { ascending: false })
-    .limit(4);
+  const drinkKeywords = findMentionedDrinkKeywords(`${post.title} ${post.excerpt ?? ""}`);
+
+  const [{ data: popularPosts }, { data: categoryPosts }, allDrinks] = await Promise.all([
+    supabase
+      .from("blog_posts")
+      .select("id, title, slug")
+      .eq("status", "published")
+      .neq("slug", slug)
+      .order("published_at", { ascending: false })
+      .limit(4),
+    post.category
+      ? supabase
+          .from("blog_posts")
+          .select("id, title, slug")
+          .eq("status", "published")
+          .eq("category", post.category)
+          .neq("slug", slug)
+          .order("published_at", { ascending: false })
+          .limit(3)
+      : Promise.resolve({ data: null }),
+    drinkKeywords.length > 0
+      ? fetchAllRows((from, to) =>
+          supabase
+            .from("drinks")
+            .select("id, name_ko, slug, size, temperature, brands(name, slug), drink_nutrition(caffeine_mg)")
+            .order("id")
+            .range(from, to),
+        )
+      : Promise.resolve([]),
+  ]);
+
+  const relatedPosts = categoryPosts && categoryPosts.length > 0 ? categoryPosts : (popularPosts ?? []).slice(0, 3);
+
+  const seenDrinkNames = new Set<string>();
+  const relatedDrinks = allDrinks
+    .filter((d) => drinkKeywords.some((k) => d.name_ko.includes(k)))
+    .filter((d) => {
+      if (seenDrinkNames.has(d.name_ko)) return false;
+      seenDrinkNames.add(d.name_ko);
+      return true;
+    })
+    .slice(0, 4);
+
+  const description = post.excerpt || post.title;
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description,
+    ...(post.cover_image_url && { image: [post.cover_image_url] }),
+    datePublished: post.published_at ?? post.created_at ?? undefined,
+    dateModified: post.updated_at ?? post.published_at ?? post.created_at ?? undefined,
+    author: { "@type": "Organization", name: "CaffeineNote Team", url: `${SITE_URL}/about` },
+    publisher: {
+      "@type": "Organization",
+      name: "카페인노트",
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/icons/icon-512.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` },
+  };
+
+  const faqPairs = extractFaqPairs(post.content);
+  const faqJsonLd =
+    faqPairs.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqPairs.map((pair) => ({
+            "@type": "Question",
+            name: pair.question,
+            acceptedAnswer: { "@type": "Answer", text: pair.answer },
+          })),
+        }
+      : null;
 
   return (
     <main className="flex-1 p-8 max-w-5xl mx-auto">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(articleJsonLd) }}
+      />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
+        />
+      )}
       <BlogViewTracker postSlug={post.slug} postTitle={post.title} category={post.category} />
       <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-8 items-start">
         <article className="flex flex-col gap-4 min-w-0">
@@ -89,6 +199,39 @@ export default async function BlogPostPage({
             className="blog-content"
             dangerouslySetInnerHTML={{ __html: renderTiptapContent(post.content) }}
           />
+
+          {(relatedPosts.length > 0 || relatedDrinks.length > 0) && (
+            <div className="mt-4 pt-6 border-t border-ink/10 grid sm:grid-cols-2 gap-6">
+              {relatedPosts.length > 0 && (
+                <div>
+                  <h2 className="font-display font-bold mb-2">관련 글</h2>
+                  <ul className="flex flex-col gap-1 text-sm">
+                    {relatedPosts.map((p) => (
+                      <li key={p.id}>
+                        <Link href={`/blog/${p.slug}`} className="text-brand underline">
+                          {p.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {relatedDrinks.length > 0 && (
+                <div>
+                  <h2 className="font-display font-bold mb-2">관련 음료</h2>
+                  <ul className="flex flex-col gap-1 text-sm">
+                    {relatedDrinks.map((d) => (
+                      <li key={d.id}>
+                        <Link href={buildCalculatorHref(d)} className="text-brand underline">
+                          {d.brands?.name} {d.name_ko}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </article>
 
         <aside className="sticky top-20 flex flex-col gap-4">
