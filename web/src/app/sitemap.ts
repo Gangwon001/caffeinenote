@@ -48,7 +48,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         temperature: drink.temperature ?? "",
       });
       return {
-        url: `${baseUrl}/drinks/${drink.brands!.slug}/${drink.slug}?${query.toString()}`,
+        // Next's sitemap serializer inserts `url` into <loc> as-is without
+        // XML-escaping it, so the raw "&" between query params has to be
+        // escaped here or the sitemap comes out as invalid XML.
+        url: `${baseUrl}/drinks/${drink.brands!.slug}/${drink.slug}?${query.toString()}`.replace(
+          /&/g,
+          "&amp;",
+        ),
         changeFrequency: "monthly" as const,
         priority: 0.7,
       };
