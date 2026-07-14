@@ -200,36 +200,18 @@ export default async function BlogPostPage({
             dangerouslySetInnerHTML={{ __html: renderTiptapContent(post.content) }}
           />
 
-          {(relatedPosts.length > 0 || relatedDrinks.length > 0) && (
-            <div className="mt-4 pt-6 border-t border-ink/10 grid sm:grid-cols-2 gap-6">
-              {relatedPosts.length > 0 && (
-                <div>
-                  <h2 className="font-display font-bold mb-2">관련 글</h2>
-                  <ul className="flex flex-col gap-1 text-sm">
-                    {relatedPosts.map((p) => (
-                      <li key={p.id}>
-                        <Link href={`/blog/${p.slug}`} className="text-brand underline">
-                          {p.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {relatedDrinks.length > 0 && (
-                <div>
-                  <h2 className="font-display font-bold mb-2">관련 음료</h2>
-                  <ul className="flex flex-col gap-1 text-sm">
-                    {relatedDrinks.map((d) => (
-                      <li key={d.id}>
-                        <Link href={buildCalculatorHref(d)} className="text-brand underline">
-                          {d.brands?.name} {d.name_ko}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          {relatedDrinks.length > 0 && (
+            <div className="mt-4 pt-6 border-t border-ink/10">
+              <h2 className="font-display font-bold mb-2">관련 음료</h2>
+              <ul className="flex flex-col gap-1 text-sm">
+                {relatedDrinks.map((d) => (
+                  <li key={d.id}>
+                    <Link href={buildCalculatorHref(d)} className="text-brand underline">
+                      {d.brands?.name} {d.name_ko}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </article>
@@ -260,6 +242,21 @@ export default async function BlogPostPage({
               <h2 className="font-display font-bold mb-2">인기글</h2>
               <ul className="flex flex-col gap-1 text-sm">
                 {popularPosts.map((p) => (
+                  <li key={p.id}>
+                    <Link href={`/blog/${p.slug}`} className="text-brand underline">
+                      {p.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {relatedPosts.length > 0 && (
+            <div className="rounded-lg border border-ink/10 p-4">
+              <h2 className="font-display font-bold mb-2">관련 글</h2>
+              <ul className="flex flex-col gap-1 text-sm">
+                {relatedPosts.map((p) => (
                   <li key={p.id}>
                     <Link href={`/blog/${p.slug}`} className="text-brand underline">
                       {p.title}
