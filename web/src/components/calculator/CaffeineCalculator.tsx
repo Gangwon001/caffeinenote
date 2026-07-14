@@ -233,48 +233,48 @@ export default function CaffeineCalculator({
       <div>
         <h2 className="font-display text-lg font-bold mb-3">직접 입력</h2>
         <p className="text-sm text-ink/60 mb-3">목록에 없는 음료는 이름과 카페인양을 직접 입력해서 추가할 수 있어요.</p>
-        <div className="flex flex-wrap gap-3 items-end">
-        <label className="flex flex-col gap-1 text-sm">
-          음료 이름
-          <input
-            value={draftName}
-            onChange={(e) => setDraftName(e.target.value)}
-            placeholder="아메리카노"
-            className="rounded-md border border-ink/10 bg-bg px-3 py-2 w-40"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          카페인(mg)
-          <input
-            type="number"
-            value={draftCaffeine}
-            onChange={(e) => setDraftCaffeine(e.target.value)}
-            placeholder="150"
-            className="rounded-md border border-ink/10 bg-bg px-3 py-2 w-28"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          섭취 시각
-          <div className="flex gap-1">
+        <div className="w-full flex flex-wrap items-end gap-3 bg-bg border border-ink/10 rounded-xl p-4">
+          <label className="flex-1 min-w-[160px] flex flex-col gap-1.5 text-sm">
+            음료 이름
             <input
-              type="date"
-              value={draftConsumedAt.split("T")[0]}
-              onChange={(e) => setDraftConsumedAt(`${e.target.value}T${draftConsumedAt.split("T")[1]}`)}
-              className="rounded-md border border-ink/10 bg-bg px-2 py-2"
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              placeholder="아메리카노"
+              className="w-full rounded-md border border-ink/15 bg-bg px-3 py-2 text-sm"
             />
-            <TimeSelect
-              value={draftConsumedAt.split("T")[1]}
-              onChange={(time) => setDraftConsumedAt(`${draftConsumedAt.split("T")[0]}T${time}`)}
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm">
+            카페인(mg)
+            <input
+              type="number"
+              value={draftCaffeine}
+              onChange={(e) => setDraftCaffeine(e.target.value)}
+              placeholder="150"
+              className="w-28 rounded-md border border-ink/15 bg-bg px-3 py-2 text-sm"
             />
-          </div>
-        </label>
-        <button
-          type="button"
-          onClick={addEntry}
-          className="rounded-md bg-brand text-bg px-4 py-2 font-medium hover:opacity-90"
-        >
-          음료 추가
-        </button>
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm">
+            섭취 시각
+            <div className="flex gap-1">
+              <input
+                type="date"
+                value={draftConsumedAt.split("T")[0]}
+                onChange={(e) => setDraftConsumedAt(`${e.target.value}T${draftConsumedAt.split("T")[1]}`)}
+                className="rounded-md border border-ink/15 bg-bg px-2 py-2 text-sm"
+              />
+              <TimeSelect
+                value={draftConsumedAt.split("T")[1]}
+                onChange={(time) => setDraftConsumedAt(`${draftConsumedAt.split("T")[0]}T${time}`)}
+              />
+            </div>
+          </label>
+          <button
+            type="button"
+            onClick={addEntry}
+            className="rounded-md bg-brand text-bg px-4 py-2 font-medium hover:opacity-90"
+          >
+            음료 추가
+          </button>
         </div>
       </div>
 
