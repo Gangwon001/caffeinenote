@@ -91,7 +91,7 @@ export default async function BlogListPage({
                 <li key={post.id}>
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="flex gap-4 rounded-lg border border-ink/10 p-4 hover:shadow-sm transition-shadow"
+                    className="flex items-start gap-4 rounded-lg border border-ink/10 p-4 hover:shadow-sm transition-shadow"
                   >
                     {post.cover_image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
