@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import OutboundLink from "@/components/analytics/OutboundLink";
 
 export const metadata: Metadata = {
   title: "개인정보처리방침 | 카페인노트",
@@ -43,20 +44,70 @@ export default function PrivacyPage() {
           있으며, 위탁받은 업체는 계약을 통해 개인정보를 안전하게 관리합니다.
         </p>
 
-        <h2>5. 이용자의 권리</h2>
+        <h2>5. 광고 및 쿠키 사용</h2>
+        <p>
+          카페인노트는 Google AdSense를 비롯한 광고 서비스를 사용하여 사이트 운영 비용을 충당할
+          수 있습니다.
+        </p>
+        <ul>
+          <li>
+            Google 등 제3자 광고 제공업체는 이용자의 이전 방문 기록을 바탕으로 관련성 높은 광고를
+            게재하기 위해 쿠키(구글의 경우 DoubleClick 쿠키 등)를 사용할 수 있습니다.
+          </li>
+          <li>
+            이 쿠키를 통해 광고 게재 이력이 기록되며, 이는 광고가 반복적으로 노출되는 것을 막고
+            광고 효과를 측정하는 데 활용됩니다.
+          </li>
+          <li>
+            이용자는{" "}
+            <OutboundLink
+              href="https://adssettings.google.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google 광고 설정
+            </OutboundLink>
+            에서 맞춤형 광고 게재를 원하지 않는다고 설정할 수 있습니다. 맞춤 광고를
+            비활성화하더라도 광고 자체가 완전히 사라지는 것은 아니며, 대략적인 위치나 검색어 등
+            비개인화 정보를 기반으로 한 광고는 계속 노출될 수 있습니다.
+          </li>
+          <li>
+            <OutboundLink
+              href="http://www.aboutads.info/choices/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              aboutads.info
+            </OutboundLink>{" "}
+            또는 브라우저 자체 설정을 통해서도 여러 광고 제공업체의 쿠키를 관리할 수 있습니다.
+          </li>
+          <li>
+            Google이 파트너 사이트에서 데이터를 수집·사용하는 방식에 대해서는{" "}
+            <OutboundLink
+              href="https://policies.google.com/technologies/ads"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google 광고 정책 페이지
+            </OutboundLink>
+            에서 자세히 확인할 수 있습니다.
+          </li>
+        </ul>
+
+        <h2>6. 이용자의 권리</h2>
         <p>
           이용자는 언제든지 자신의 개인정보를 조회·수정할 수 있으며, 회원 탈퇴를 통해 개인정보
           삭제를 요청할 수 있습니다. 문의는 아래 연락처로 접수해주세요.
         </p>
 
-        <h2>6. 개인정보 관련 문의</h2>
+        <h2>7. 개인정보 관련 문의</h2>
         <p>
           개인정보 처리와 관련한 문의사항은{" "}
           <a href="mailto:wonhyeok619@gmail.com">wonhyeok619@gmail.com</a>으로 연락해주시기
           바랍니다.
         </p>
 
-        <p>시행일: 2026년 7월 12일</p>
+        <p>시행일: 2026년 7월 15일</p>
       </div>
     </main>
   );
