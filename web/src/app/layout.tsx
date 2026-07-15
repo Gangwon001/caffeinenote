@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
@@ -86,12 +87,30 @@ export default function RootLayout({
   // shipping a script tag that has nothing to point at.
   const gaEnabled = process.env.NODE_ENV === "production" && Boolean(gaId);
 
+  const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+  const adsenseEnabled = process.env.NODE_ENV === "production" && Boolean(adsenseClientId);
+
   return (
     <html
       lang="ko"
       className={`${notoSansKR.variable} ${notoSerifKR.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
+        {/*
+          strategy="beforeInteractive" makes Next.js inject this into the
+          document <head> itself regardless of where it's written in the
+          tree — App Router doesn't support a hand-written <head> element,
+          so this is the correct way to satisfy AdSense's "paste in <head>"
+          instruction here.
+        */}
+        {adsenseEnabled && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
+            crossOrigin="anonymous"
+            strategy="beforeInteractive"
+          />
+        )}
         {children}
         <ServiceWorkerRegister />
         <InstallPrompt />
