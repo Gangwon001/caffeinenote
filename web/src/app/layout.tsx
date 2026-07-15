@@ -69,6 +69,13 @@ export const metadata: Metadata = {
     // `mobile-web-app-capable` tag; older iOS Safari only honors the
     // apple-prefixed one, so set it explicitly for compatibility.
     "apple-mobile-web-app-capable": "yes",
+    // AdSense site-ownership verification: this meta tag is rendered
+    // directly into the SSR'd <head>, unlike the adsbygoogle.js loader
+    // (which Next injects client-side), so it's visible to crawlers that
+    // only fetch raw HTML.
+    ...(process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && {
+      "google-adsense-account": process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID,
+    }),
   },
 };
 
