@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { extractTiptapExcerpt } from "@/lib/tiptap-html";
 import { getCategoryStyle } from "@/lib/blog-categories";
 import { formatDate } from "@/lib/format-date";
+import { SHOW_VIEW_COUNT } from "@/lib/feature-flags";
 import { BookIcon, EyeIcon, ChevronIcon } from "@/components/icons";
 import BlogHeroIllustration from "@/components/blog/BlogHeroIllustration";
 import BlogFilterBar from "@/components/blog/BlogFilterBar";
@@ -123,10 +124,12 @@ export default async function BlogListPage({
                       <span className="whitespace-nowrap">{formatDate(post.published_at)}</span>
                       <span>·</span>
                       <span className="truncate">CaffeineNote Team</span>
-                      <span className="ml-auto flex items-center gap-1 shrink-0">
-                        <EyeIcon className="w-3.5 h-3.5" />
-                        {post.view_count.toLocaleString()}
-                      </span>
+                      {SHOW_VIEW_COUNT && (
+                        <span className="ml-auto flex items-center gap-1 shrink-0">
+                          <EyeIcon className="w-3.5 h-3.5" />
+                          {post.view_count.toLocaleString()}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </Link>

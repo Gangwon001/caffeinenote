@@ -93,12 +93,14 @@ export default async function BlogPostPage({
   const drinkKeywords = findMentionedDrinkKeywords(`${post.title} ${post.excerpt ?? ""}`);
 
   const [{ data: popularPosts }, { data: categoryPosts }, allDrinks] = await Promise.all([
+    // "인기글" — sorted by actual view_count, never displayed as a number,
+    // just used to rank which titles show up here.
     supabase
       .from("blog_posts")
       .select("id, title, slug, published_at")
       .eq("status", "published")
       .neq("slug", slug)
-      .order("published_at", { ascending: false })
+      .order("view_count", { ascending: false })
       .limit(4),
     post.category
       ? supabase
