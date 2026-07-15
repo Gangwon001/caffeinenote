@@ -97,18 +97,17 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         {/*
-          strategy="beforeInteractive" makes Next.js inject this into the
-          document <head> itself regardless of where it's written in the
-          tree — App Router doesn't support a hand-written <head> element,
-          so this is the correct way to satisfy AdSense's "paste in <head>"
-          instruction here.
+          App Router doesn't support a hand-written <head> element in the
+          layout, so next/script is the framework-idiomatic stand-in for
+          AdSense's "paste in <head>" instruction — Next hoists it there
+          regardless of where it's written in the tree.
         */}
         {adsenseEnabled && (
           <Script
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
             crossOrigin="anonymous"
-            strategy="beforeInteractive"
+            strategy="afterInteractive"
           />
         )}
         {children}
