@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { fetchAllRows } from "@/lib/supabase/fetch-all";
+import { formatDate } from "@/lib/format-date";
 import HeroIllustration from "@/components/home/HeroIllustration";
 import HomeSearchForm from "@/components/home/HomeSearchForm";
 import {
@@ -54,15 +55,6 @@ const FEATURE_CARDS = [
     iconColor: "#D98A4B",
   },
 ];
-
-function formatDate(value: string | null): string {
-  if (!value) return "";
-  return new Date(value).toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-}
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -182,7 +174,9 @@ export default async function HomePage() {
                 )}
                 <div className="p-3">
                   <p className="text-sm font-medium line-clamp-2">{post.title}</p>
-                  <p className="text-xs text-ink/50 mt-2">{formatDate(post.published_at)}</p>
+                  <p className="text-xs text-ink/50 mt-2 whitespace-nowrap">
+                    {formatDate(post.published_at)}
+                  </p>
                 </div>
               </Link>
             ))}

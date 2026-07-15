@@ -30,7 +30,7 @@ export default function BlogFilterBar({
         />
         <button
           type="submit"
-          className="rounded-md bg-brand text-bg px-6 py-2.5 font-medium hover:opacity-90"
+          className="shrink-0 whitespace-nowrap rounded-md bg-brand text-bg px-6 py-2.5 font-medium hover:opacity-90"
         >
           검색
         </button>

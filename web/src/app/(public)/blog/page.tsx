@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { extractTiptapExcerpt } from "@/lib/tiptap-html";
 import { getCategoryStyle } from "@/lib/blog-categories";
+import { formatDate } from "@/lib/format-date";
 import { BookIcon, EyeIcon, ChevronIcon } from "@/components/icons";
 import BlogHeroIllustration from "@/components/blog/BlogHeroIllustration";
 import BlogFilterBar from "@/components/blog/BlogFilterBar";
@@ -13,16 +14,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/blog", types: { "application/rss+xml": "/rss.xml" } },
 };
 
-const PAGE_SIZE = 5;
-
-function formatDate(value: string | null): string {
-  if (!value) return "";
-  return new Date(value).toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-}
+const PAGE_SIZE = 6;
 
 export default async function BlogListPage({
   searchParams,
@@ -80,65 +72,67 @@ export default async function BlogListPage({
         </div>
       </section>
 
-      <section className="max-w-4xl mx-auto px-6 py-10 flex flex-col gap-6">
-        <BlogFilterBar defaults={filters} />
+      <section className="max-w-6xl mx-auto px-6 py-10 flex flex-col gap-6">
+        <div className="max-w-4xl mx-auto w-full">
+          <BlogFilterBar defaults={filters} />
+        </div>
 
         {pageResults.length > 0 ? (
-          <ul className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pageResults.map((post) => {
               const style = getCategoryStyle(post.category);
+              // The cover image is often a text-heavy infographic meant for
+              // full-size display — scaling it down into a small card
+              // thumbnail turns that text to mush. list_thumbnail_url is a
+              // separate, plainer image authored for exactly this spot.
+              const thumbnailUrl = post.list_thumbnail_url || post.cover_image_url;
               return (
-                <li key={post.id}>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="flex items-start gap-4 rounded-lg border border-ink/10 p-4 hover:shadow-sm transition-shadow"
-                  >
-                    {post.cover_image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={post.cover_image_url}
-                        alt=""
-                        className="w-32 sm:w-40 aspect-[3/2] shrink-0 rounded-md object-cover"
-                      />
-                    ) : (
-                      <div
-                        className="w-32 sm:w-40 aspect-[3/2] shrink-0 rounded-md flex items-center justify-center"
-                        style={{
-                          backgroundColor: style?.bg ?? "#E8F4EC",
-                          color: style?.color ?? "#0F5B3A",
-                        }}
-                      >
-                        <BookIcon className="w-8 h-8" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      {post.category && (
-                        <span
-                          className="inline-block rounded-full px-3 py-0.5 text-xs font-medium mb-1"
-                          style={{ backgroundColor: style?.bg, color: style?.color }}
-                        >
-                          {post.category}
-                        </span>
-                      )}
-                      <h2 className="font-bold">{post.title}</h2>
-                      <p className="text-sm text-ink/70 mt-1 line-clamp-2">
-                        {post.excerpt || extractTiptapExcerpt(post.content)}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-ink/50 mt-2">
-                        <span>{formatDate(post.published_at)}</span>
-                        <span>·</span>
-                        <span>CaffeineNote Team</span>
-                        <span className="ml-auto flex items-center gap-1">
-                          <EyeIcon className="w-3.5 h-3.5" />
-                          {post.view_count.toLocaleString()}
-                        </span>
-                      </div>
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="flex flex-col rounded-lg border border-ink/10 overflow-hidden hover:shadow-sm transition-shadow"
+                >
+                  {thumbnailUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={thumbnailUrl} alt="" className="w-full aspect-video object-cover" />
+                  ) : (
+                    <div
+                      className="w-full aspect-video flex items-center justify-center"
+                      style={{
+                        backgroundColor: style?.bg ?? "#E8F4EC",
+                        color: style?.color ?? "#0F5B3A",
+                      }}
+                    >
+                      <BookIcon className="w-8 h-8" />
                     </div>
-                  </Link>
-                </li>
+                  )}
+                  <div className="flex-1 flex flex-col p-4">
+                    {post.category && (
+                      <span
+                        className="inline-block w-fit rounded-full px-3 py-0.5 text-xs font-medium mb-2"
+                        style={{ backgroundColor: style?.bg, color: style?.color }}
+                      >
+                        {post.category}
+                      </span>
+                    )}
+                    <h2 className="font-bold line-clamp-2">{post.title}</h2>
+                    <p className="text-sm text-ink/70 mt-1 line-clamp-2">
+                      {post.excerpt || extractTiptapExcerpt(post.content)}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-ink/50 mt-auto pt-3">
+                      <span className="whitespace-nowrap">{formatDate(post.published_at)}</span>
+                      <span>·</span>
+                      <span className="truncate">CaffeineNote Team</span>
+                      <span className="ml-auto flex items-center gap-1 shrink-0">
+                        <EyeIcon className="w-3.5 h-3.5" />
+                        {post.view_count.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
               );
             })}
-          </ul>
+          </div>
         ) : (
           <p className="text-ink/60">조건에 맞는 글이 없습니다.</p>
         )}

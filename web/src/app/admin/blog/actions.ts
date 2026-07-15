@@ -10,8 +10,19 @@ export async function createPost(status: "draft" | "published", formData: FormDa
   const slug = formData.get("slug") as string;
   const category = (formData.get("category") as string) || null;
   const cover_image_url = (formData.get("cover_image_url") as string) || null;
+  const list_thumbnail_url = (formData.get("list_thumbnail_url") as string) || null;
   const content = JSON.parse((formData.get("content") as string) || "{}");
-  const excerpt = (formData.get("excerpt") as string) || extractTiptapExcerpt(content);
+  const excerptInput = (formData.get("excerpt") as string).trim();
+
+  // A missing excerpt silently falls back to auto-extracted body text, which
+  // usually just repeats the title as the first line — require a real
+  // human-written excerpt before a post can go live (drafts are exempt).
+  if (status === "published" && !excerptInput) {
+    redirect(
+      `/admin/blog/new?error=${encodeURIComponent("발행하려면 요약(excerpt)을 입력해야 합니다.")}`,
+    );
+  }
+  const excerpt = excerptInput || extractTiptapExcerpt(content);
 
   const supabase = await createClient();
   const { error } = await supabase.from("blog_posts").insert({
@@ -20,6 +31,7 @@ export async function createPost(status: "draft" | "published", formData: FormDa
     status,
     category,
     cover_image_url,
+    list_thumbnail_url,
     excerpt,
     content,
     published_at: status === "published" ? new Date().toISOString() : null,
@@ -42,8 +54,16 @@ export async function updatePost(
   const slug = formData.get("slug") as string;
   const category = (formData.get("category") as string) || null;
   const cover_image_url = (formData.get("cover_image_url") as string) || null;
+  const list_thumbnail_url = (formData.get("list_thumbnail_url") as string) || null;
   const content = JSON.parse((formData.get("content") as string) || "{}");
-  const excerpt = (formData.get("excerpt") as string) || extractTiptapExcerpt(content);
+  const excerptInput = (formData.get("excerpt") as string).trim();
+
+  if (status === "published" && !excerptInput) {
+    redirect(
+      `/admin/blog/${id}/edit?error=${encodeURIComponent("발행하려면 요약(excerpt)을 입력해야 합니다.")}`,
+    );
+  }
+  const excerpt = excerptInput || extractTiptapExcerpt(content);
 
   const supabase = await createClient();
 
@@ -61,6 +81,7 @@ export async function updatePost(
       status,
       category,
       cover_image_url,
+      list_thumbnail_url,
       excerpt,
       content,
       updated_at: new Date().toISOString(),

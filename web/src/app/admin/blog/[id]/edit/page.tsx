@@ -66,12 +66,13 @@ export default async function EditBlogPostPage({
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          요약(excerpt)
+          요약(excerpt) — 발행 시 필수
           <textarea
             name="excerpt"
             rows={2}
+            required
             defaultValue={post.excerpt ?? ""}
-            placeholder="비워두면 본문에서 자동으로 생성됩니다."
+            placeholder="목록/카드에 표시될 요약을 입력하세요. 본문과 다른 문장으로 작성해주세요."
             className="rounded-md border px-3 py-2"
           />
         </label>
@@ -81,6 +82,19 @@ export default async function EditBlogPostPage({
           contenteditable body) to the label's first labelable descendant,
           stealing focus away from whatever was actually clicked.
         */}
+        <div className="flex flex-col gap-1 text-sm">
+          <span>목록용 썸네일</span>
+          <p className="text-xs text-ink/50">
+            목록/카드에는 이 이미지가 우선 표시됩니다. 등록하지 않으면 커버 이미지를 대신
+            사용하는데, 커버 이미지는 텍스트가 많은 인포그래픽일 수 있어 작게 축소하면
+            뭉개질 수 있습니다. 목록용 썸네일을 별도로 등록하는 것을 권장합니다.
+          </p>
+          <CoverImageInput
+            name="list_thumbnail_url"
+            defaultValue={post.list_thumbnail_url}
+            folderId={post.id}
+          />
+        </div>
         <div className="flex flex-col gap-1 text-sm">
           <span>커버 이미지</span>
           <CoverImageInput
@@ -101,6 +115,7 @@ export default async function EditBlogPostPage({
           <button
             type="submit"
             formAction={updateDraft}
+            formNoValidate
             className="rounded-md border border-brand text-brand px-4 py-2 font-medium hover:bg-brand-soft w-fit"
           >
             임시저장

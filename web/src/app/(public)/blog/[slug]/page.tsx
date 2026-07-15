@@ -7,6 +7,7 @@ import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { renderTiptapContent, extractFaqPairs } from "@/lib/tiptap-html";
 import { safeJsonLd } from "@/lib/json-ld";
 import { findMentionedDrinkKeywords } from "@/lib/related-drinks";
+import { formatDate } from "@/lib/format-date";
 import BlogViewTracker from "@/components/analytics/BlogViewTracker";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -94,7 +95,7 @@ export default async function BlogPostPage({
   const [{ data: popularPosts }, { data: categoryPosts }, allDrinks] = await Promise.all([
     supabase
       .from("blog_posts")
-      .select("id, title, slug")
+      .select("id, title, slug, published_at")
       .eq("status", "published")
       .neq("slug", slug)
       .order("published_at", { ascending: false })
@@ -102,7 +103,7 @@ export default async function BlogPostPage({
     post.category
       ? supabase
           .from("blog_posts")
-          .select("id, title, slug")
+          .select("id, title, slug, published_at")
           .eq("status", "published")
           .eq("category", post.category)
           .neq("slug", slug)
@@ -240,12 +241,18 @@ export default async function BlogPostPage({
           {popularPosts && popularPosts.length > 0 && (
             <div className="rounded-lg border border-ink/10 p-4">
               <h2 className="font-display font-bold mb-2">인기글</h2>
-              <ul className="flex flex-col gap-1 text-sm">
+              <ul className="flex flex-col divide-y divide-ink/10">
                 {popularPosts.map((p) => (
-                  <li key={p.id}>
-                    <Link href={`/blog/${p.slug}`} className="text-brand underline">
+                  <li key={p.id} className="py-2 first:pt-0 last:pb-0">
+                    <Link
+                      href={`/blog/${p.slug}`}
+                      className="block truncate text-sm text-brand hover:underline"
+                    >
                       {p.title}
                     </Link>
+                    <span className="text-xs text-ink/50 whitespace-nowrap">
+                      {formatDate(p.published_at)}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -255,12 +262,18 @@ export default async function BlogPostPage({
           {relatedPosts.length > 0 && (
             <div className="rounded-lg border border-ink/10 p-4">
               <h2 className="font-display font-bold mb-2">관련 글</h2>
-              <ul className="flex flex-col gap-1 text-sm">
+              <ul className="flex flex-col divide-y divide-ink/10">
                 {relatedPosts.map((p) => (
-                  <li key={p.id}>
-                    <Link href={`/blog/${p.slug}`} className="text-brand underline">
+                  <li key={p.id} className="py-2 first:pt-0 last:pb-0">
+                    <Link
+                      href={`/blog/${p.slug}`}
+                      className="block truncate text-sm text-brand hover:underline"
+                    >
                       {p.title}
                     </Link>
+                    <span className="text-xs text-ink/50 whitespace-nowrap">
+                      {formatDate(p.published_at)}
+                    </span>
                   </li>
                 ))}
               </ul>
